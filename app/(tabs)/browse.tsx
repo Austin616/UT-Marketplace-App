@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, FlatList, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '~/lib/supabase';
-import SearchBar from '~/components/SearchBar';
+import { SearchBar } from '~/components/SearchBar';
 import CategoryButtons from '~/components/CategoryButtons';
 import ListingCard from '~/components/ListingCard';
 import FilterModal from '~/components/FilterModal';
