@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
-import { BookOpen, Smartphone, Armchair, Shirt, Home, Wrench, ArrowRight } from 'lucide-react-native';
+import { Sofa, Home, Laptop, Car, Book, Shirt, Utensils, ShoppingBag, ArrowRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { COLORS } from '~/theme/colors';
 import { AnimatedButton } from './AnimatedButton';
@@ -12,12 +12,14 @@ interface Category {
 }
 
 const categories: Category[] = [
-  { id: 1, name: 'Textbooks', icon: <BookOpen size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 2, name: 'Electronics', icon: <Smartphone size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 3, name: 'Furniture', icon: <Armchair size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 4, name: 'Clothing', icon: <Shirt size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 5, name: 'Housing', icon: <Home size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 6, name: 'Services', icon: <Wrench size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 1, name: 'Furniture', icon: <Sofa size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 2, name: 'Housing', icon: <Home size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 3, name: 'Tech', icon: <Laptop size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 4, name: 'Vehicles', icon: <Car size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 5, name: 'Books', icon: <Book size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 6, name: 'Clothing', icon: <Shirt size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 7, name: 'Kitchen', icon: <Utensils size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 8, name: 'Other', icon: <ShoppingBag size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
 ];
 
 export const CategoriesSection = () => {
