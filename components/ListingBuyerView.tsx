@@ -129,15 +129,14 @@ export const ListingBuyerView: React.FC<ListingBuyerViewProps> = ({
       const { data, error } = await supabase
         .from('listing_favorite_counts')
         .select('favorite_count, watchlist_count')
-        .eq('listing_id', listing.id)
-        .single();
+        .eq('listing_id', listing.id);
 
       if (error) throw error;
 
-      if (data) {
+      if (data && data.length > 0) {
         setEngagementStats({ 
-          favorites: data.favorite_count || 0, 
-          watchlist: data.watchlist_count || 0 
+          favorites: data[0].favorite_count || 0, 
+          watchlist: data[0].watchlist_count || 0 
         });
       } else {
         setEngagementStats({ favorites: 0, watchlist: 0 });
@@ -164,8 +163,16 @@ export const ListingBuyerView: React.FC<ListingBuyerViewProps> = ({
   };
 
   const navigateToMessage = () => {
-    // Navigate to message screen - implement this based on your routing
-    Alert.alert('Message Seller', 'Message functionality coming soon!');
+    router.push({
+      pathname: '/chat/[id]',
+      params: { 
+        id: listing.user_id,
+        otherUserId: listing.user_id,
+        otherUserName: listing.user_name,
+        listingId: listing.id.toString(),
+        listingTitle: listing.title
+      }
+    });
   };
 
   const handleSaveListing = async () => {
@@ -471,13 +478,13 @@ export const ListingBuyerView: React.FC<ListingBuyerViewProps> = ({
                   <Text className="font-semibold text-gray-900 text-lg" numberOfLines={1}>
                     {listing.user_name}
                   </Text>
-                  <View className="flex-row items-center mt-1">
+                  <View className="flex-row items-center mt-1 flex-wrap">
                     <UserRatingDisplay 
                       userId={listing.user_id} 
                       rating={sellerRating?.average} 
-                      className="mr-2" 
+                      className="mr-2 flex-shrink-0" 
                     />
-                    <Text className="text-gray-600 text-sm">
+                    <Text className="text-gray-600 text-sm flex-shrink" numberOfLines={1}>
                       {sellerRating ? (
                         sellerRating.count > 0 ? (
                           `(${sellerRating.count} review${sellerRating.count !== 1 ? 's' : ''})`

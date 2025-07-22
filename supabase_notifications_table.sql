@@ -52,6 +52,7 @@ END;
 $$ language 'plpgsql';
 
 -- Create trigger to automatically update updated_at
+DROP TRIGGER IF EXISTS update_notifications_updated_at ON notifications;
 CREATE TRIGGER update_notifications_updated_at
   BEFORE UPDATE ON notifications
   FOR EACH ROW
@@ -139,8 +140,8 @@ BEGIN
     jsonb_build_object(
       'listing_title', listing_record.title,
       'listing_price', listing_record.price,
-      'listing_image', CASE WHEN listing_record.images IS NOT NULL AND jsonb_array_length(listing_record.images) > 0 
-                            THEN listing_record.images->0 
+      '    listing_image', CASE WHEN listing_record.images IS NOT NULL AND array_length(listing_record.images, 1) > 0 
+                            THEN listing_record.images[1] 
                             ELSE NULL END,
       'actor_name', actor_name
     )
@@ -151,6 +152,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger for favorite/watchlist notifications
+DROP TRIGGER IF EXISTS create_favorite_notification_trigger ON user_favorites;
 CREATE TRIGGER create_favorite_notification_trigger
   AFTER INSERT ON user_favorites
   FOR EACH ROW

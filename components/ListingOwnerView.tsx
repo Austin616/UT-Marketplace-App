@@ -65,15 +65,14 @@ export const ListingOwnerView: React.FC<ListingOwnerViewProps> = ({
       const { data, error } = await supabase
         .from('listing_favorite_counts')
         .select('favorite_count, watchlist_count')
-        .eq('listing_id', listing.id)
-        .single();
+        .eq('listing_id', listing.id);
 
       if (error) throw error;
 
-      if (data) {
+      if (data && data.length > 0) {
         setFavoriteCounts({ 
-          favorites: data.favorite_count || 0, 
-          watchlist: data.watchlist_count || 0 
+          favorites: data[0].favorite_count || 0, 
+          watchlist: data[0].watchlist_count || 0 
         });
       } else {
         setFavoriteCounts({ favorites: 0, watchlist: 0 });
