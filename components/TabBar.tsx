@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Animated } from "react-native";
+import { View, TouchableOpacity, Animated, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Home, Search, MessageCircle, User, Plus } from "lucide-react-native";
 import { COLORS } from "~/theme/colors";
@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useRef, useEffect, useState } from "react";
 import { useAuth } from "~/contexts/AuthContext";
 import { supabase } from "~/lib/supabase";
+import { useNotificationCount } from "~/lib/useNotifications";
 
 const tabRoutes = [
   { name: "index", icon: Home },
@@ -24,18 +25,70 @@ export default function TabBar({
 }) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { unreadCount } = useNotificationCount();
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const tabAnimations = useRef(tabRoutes.map(() => new Animated.Value(1))).current;
   
-  // TODO: Implement actual unread message count fetching
-  // For now, this is a placeholder - you would implement this when you have a messages system
+  // Fetch unread messages count specifically for the messages tab
   useEffect(() => {
     if (user?.email) {
-      // Placeholder for unread message count
-      // This would be replaced with actual message count fetching
-      setUnreadMessageCount(0);
+      fetchUnreadMessages();
     }
   }, [user?.email]);
+
+  // Real-time updates for message count
+  useEffect(() => {
+    if (!user?.email) return;
+
+    const subscription = supabase
+      .channel(`messages_count:${user.email}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.email}`,
+        },
+        (payload) => {
+          console.log('Message count update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            // New message - increment count
+            setUnreadMessageCount(prev => prev + 1);
+          } else if (payload.eventType === 'UPDATE') {
+            // Check if read status changed
+            if (payload.old.read === false && payload.new.read === true) {
+              setUnreadMessageCount(prev => Math.max(0, prev - 1));
+            } else if (payload.old.read === true && payload.new.read === false) {
+              setUnreadMessageCount(prev => prev + 1);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user?.email]);
+
+  const fetchUnreadMessages = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('receiver_id', user.email)
+        .eq('read', false);
+      
+      if (error) throw error;
+      setUnreadMessageCount(data?.length || 0);
+    } catch (error) {
+      console.error('Error fetching unread messages:', error);
+    }
+  };
   
   return (
     <View 
@@ -103,14 +156,50 @@ export default function TabBar({
                   <View 
                     style={{
                       position: 'absolute',
-                      top: 4,
-                      right: 12,
-                      width: 8,
-                      height: 8,
-                      borderRadius: 4,
+                      top: 2,
+                      right: 8,
+                      minWidth: 16,
+                      height: 16,
+                      borderRadius: 8,
                       backgroundColor: '#ef4444',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 4,
                     }}
-                  />
+                  >
+                    <Text style={{
+                      color: 'white',
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                    }}>
+                      {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                    </Text>
+                  </View>
+                )}
+                {/* General notifications indicator (profile tab) */}
+                {tab.name === 'profile' && unreadCount > 0 && (
+                  <View 
+                    style={{
+                      position: 'absolute',
+                      top: 2,
+                      right: 8,
+                      minWidth: 16,
+                      height: 16,
+                      borderRadius: 8,
+                      backgroundColor: '#ef4444',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 4,
+                    }}
+                  >
+                    <Text style={{
+                      color: 'white',
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                    }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </Text>
+                  </View>
                 )}
               </Animated.View>
             </TouchableOpacity>

@@ -166,3 +166,36 @@ GRANT USAGE ON SEQUENCE notifications_id_seq TO authenticated;
 ALTER TABLE notifications
 ALTER COLUMN listing_id TYPE uuid
 USING listing_id::uuid;
+
+CREATE OR REPLACE FUNCTION create_notification(
+  p_user_id TEXT,
+  p_actor_id TEXT,
+  p_type TEXT,
+  p_title TEXT,
+  p_message TEXT,
+  p_data JSONB,
+  p_listing_id UUID
+)
+RETURNS VOID AS $$
+BEGIN
+  INSERT INTO notifications (
+    user_id,
+    actor_id,
+    type,
+    title,
+    message,
+    data,
+    listing_id
+  ) VALUES (
+    p_user_id,
+    p_actor_id,
+    p_type,
+    p_title,
+    p_message,
+    p_data,
+    p_listing_id
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION create_notification(TEXT, TEXT, TEXT, TEXT, TEXT, JSONB, UUID) TO authenticated;

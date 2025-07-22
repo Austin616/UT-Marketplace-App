@@ -1,12 +1,10 @@
-import { View, Text, ActivityIndicator, TouchableOpacity, Alert, ScrollView, Dimensions } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '~/lib/supabase';
 import { useAuth } from '~/contexts/AuthContext';
 import { COLORS } from '~/theme/colors';
-import { MapPin, Calendar, Tag, ArrowLeft, MessageCircle, Star, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AnimatedButton } from '~/components/AnimatedButton';
 import { ListingOwnerView } from '~/components/ListingOwnerView';
 import { ListingBuyerView } from '~/components/ListingBuyerView';
 
@@ -52,7 +50,7 @@ export default function ListingScreen() {
 
   useEffect(() => {
     fetchListing();
-  }, [id]);
+  }, []);
 
   const fetchListing = async () => {
     try {
@@ -101,24 +99,6 @@ export default function ListingScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleMessageSeller = () => {
-    if (!user?.email) {
-      router.push('/(auth)/login');
-      return;
-    }
-    
-    if (user.email === listing?.user_id) {
-      Alert.alert('Cannot Message', 'You cannot message yourself about your own listing.');
-      return;
-    }
-
-    // Navigate to messages with this listing
-    router.push({
-      pathname: '/(tabs)/messages',
-      params: { listing_id: id }
-    });
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -186,7 +166,6 @@ export default function ListingScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={[]}>      
-      {/* Conditionally render owner or buyer view */}
       {shouldShowBuyerView ? (
         <ListingBuyerView
           listing={listing}

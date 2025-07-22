@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { supabase } from '~/lib/supabase';
 import { COLORS } from '~/theme/colors';
 import { useRouter } from 'expo-router';
-import { Star, CheckCircle2, Settings2, User, Calendar, MapPin, Plus, Edit3, Eye, BarChart3, MessageCircle, Heart, FileText } from 'lucide-react-native';
+import { Star, CheckCircle2, Settings2, User, Calendar, MapPin, Plus, Edit3, Eye, BarChart3, MessageCircle, Heart, FileText, Bell } from 'lucide-react-native';
 import { getTimeAgo } from '../../utils/timeago';
 import { AnimatedButton } from '~/components/AnimatedButton';
 import UserRatingDisplay from '~/components/UserRatingDisplay';
+import { useNotificationCount } from '~/lib/useNotifications';
 
 interface UserSettings {
   display_name: string | null;
@@ -38,6 +39,7 @@ interface Rating {
 export default function ProfileScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const { unreadCount } = useNotificationCount();
   const [profile, setProfile] = useState<UserSettings | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
@@ -262,12 +264,45 @@ export default function ProfileScreen() {
             )}
           </View>
           
-          <TouchableOpacity
-            onPress={() => router.push('/(modals)/settings')}
-            className="absolute top-0 right-0 p-3 rounded-full bg-gray-100"
-          >
-            <Settings2 size={24} color="#6b7280" />
-          </TouchableOpacity>
+          {/* Action buttons */}
+          <View className="absolute top-0 right-0 flex-row gap-2">
+            <TouchableOpacity
+              onPress={() => router.push('/notifications')}
+              className="p-3 rounded-full bg-gray-100 relative"
+            >
+              <Bell size={24} color="#6b7280" />
+              {unreadCount > 0 && (
+                <View 
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    minWidth: 16,
+                    height: 16,
+                    borderRadius: 8,
+                    backgroundColor: '#ef4444',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text style={{
+                    color: 'white',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                  }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/(modals)/settings')}
+              className="p-3 rounded-full bg-gray-100"
+            >
+              <Settings2 size={24} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Rating Display */}

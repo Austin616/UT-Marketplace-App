@@ -151,6 +151,8 @@ export default function ChatScreen() {
     }
   };
 
+  const isValidUUID = (id: string) => typeof id === 'string' && /^[0-9a-fA-F-]{36}$/.test(id);
+
   const sendMessage = async () => {
     if (!user?.email || !otherUserId || !newMessage.trim()) return;
 
@@ -161,7 +163,7 @@ export default function ChatScreen() {
         sender_id: user.email,
         receiver_id: otherUserId,
         content: newMessage.trim(),
-        listing_id: listingId === "general" ? null : listingId,
+        listing_id: (listingId === "general" || !isValidUUID(listingId)) ? null : listingId,
         read: false,
       };
 

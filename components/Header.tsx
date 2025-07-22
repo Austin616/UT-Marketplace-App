@@ -5,64 +5,64 @@ import { usePathname, useRouter } from 'expo-router';
 import Icon from '../assets/ios-light.png';
 import { supabase } from '~/lib/supabase';
 import { useAuth } from '~/contexts/AuthContext';
+import { useNotificationCount } from '~/lib/useNotifications';
 
 function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useNotificationCount();
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
-  // Fetch unread notification and message counts
+  // Fetch unread message count and set up real-time updates
   useEffect(() => {
     if (user?.email) {
-      fetchUnreadCount();
       fetchUnreadMessageCount();
       
-      // Set up real-time subscription for notifications
-      const channel = supabase
-        .channel('notifications')
+      // Set up real-time subscription for messages
+      const subscription = supabase
+        .channel(`header_messages:${user.email}`)
         .on('postgres_changes', 
           { 
             event: '*', 
             schema: 'public', 
-            table: 'notifications',
-            filter: `user_id=eq.${user.email}`
+            table: 'messages',
+            filter: `receiver_id=eq.${user.email}`
           }, 
-          () => {
-            fetchUnreadCount();
+          (payload) => {
+            console.log('Header message update:', payload);
+            
+            if (payload.eventType === 'INSERT') {
+              setUnreadMessageCount(prev => prev + 1);
+            } else if (payload.eventType === 'UPDATE') {
+              if (payload.old.read === false && payload.new.read === true) {
+                setUnreadMessageCount(prev => Math.max(0, prev - 1));
+              } else if (payload.old.read === true && payload.new.read === false) {
+                setUnreadMessageCount(prev => prev + 1);
+              }
+            }
           }
         )
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        subscription.unsubscribe();
       };
     }
   }, [user?.email]);
-
-  const fetchUnreadCount = async () => {
-    if (!user?.email) return;
-
-    try {
-      const { data, error } = await supabase.rpc('get_unread_notification_count', {
-        p_user_id: user.email
-      });
-
-      if (error) throw error;
-      setUnreadCount(data || 0);
-    } catch (error) {
-      console.error('Error fetching unread count:', error);
-    }
-  };
 
   const fetchUnreadMessageCount = async () => {
     if (!user?.email) return;
 
     try {
-      // TODO: Implement when messages system is ready
-      // For now, placeholder - would count unread messages
-      setUnreadMessageCount(0);
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('receiver_id', user.email)
+        .eq('read', false);
+      
+      if (error) throw error;
+      setUnreadMessageCount(data?.length || 0);
     } catch (error) {
       console.error('Error fetching unread message count:', error);
     }

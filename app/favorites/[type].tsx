@@ -146,6 +146,8 @@ export default function FavoritesScreen() {
     }, 100); // Small delay to ensure back navigation completes
   };
 
+  const isValidUUID = (id: string) => typeof id === 'string' && /^[0-9a-fA-F-]{36}$/.test(id);
+
   const handleMessageSeller = (listing: Listing) => {
     if (!user?.email) {
       router.back();
@@ -164,7 +166,7 @@ export default function FavoritesScreen() {
     setTimeout(() => {
       router.push({
         pathname: '/chat/[id]',
-        params: { id: listing.id }
+        params: { id: isValidUUID(listing.id) ? listing.id : 'general' }
       });
     }, 100);
   };

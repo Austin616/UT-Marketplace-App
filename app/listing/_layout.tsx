@@ -6,7 +6,7 @@ export default function CreateLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
-        header: ({ route, options }) => (
+        header: ({ options }) => (
           <ModalHeader
             title={options.title || 'Loading...'}
           />

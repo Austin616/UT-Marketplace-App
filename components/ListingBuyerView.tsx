@@ -162,6 +162,8 @@ export const ListingBuyerView: React.FC<ListingBuyerViewProps> = ({
     }
   };
 
+  const isValidUUID = (id: string) => typeof id === 'string' && /^[0-9a-fA-F-]{36}$/.test(id);
+
   const navigateToMessage = () => {
     router.push({
       pathname: '/chat/[id]',
@@ -169,7 +171,7 @@ export const ListingBuyerView: React.FC<ListingBuyerViewProps> = ({
         id: listing.user_id,
         otherUserId: listing.user_id,
         otherUserName: listing.user_name,
-        listingId: listing.id.toString(),
+        listingId: isValidUUID(listing.id) ? listing.id : 'general',
         listingTitle: listing.title
       }
     });

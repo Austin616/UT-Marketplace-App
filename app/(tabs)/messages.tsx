@@ -167,14 +167,16 @@ export default function MessagesScreen() {
     }
   };
 
+  const isValidUUID = (id: string) => typeof id === 'string' && /^[0-9a-fA-F-]{36}$/.test(id);
+
   const navigateToChat = (conversation: Conversation) => {
     router.push({
       pathname: '/chat/[id]',
       params: { 
-        id: `${conversation.user_id}:${conversation.listing_id}`,
+        id: `${conversation.user_id}:${isValidUUID(conversation.listing_id) ? conversation.listing_id : 'general'}`,
         otherUserName: conversation.user_name,
         otherUserId: conversation.user_id,
-        listingId: conversation.listing_id,
+        listingId: isValidUUID(conversation.listing_id) ? conversation.listing_id : 'general',
         listingTitle: conversation.listing_title
       }
     });
