@@ -9,6 +9,7 @@ import { getTimeAgo } from '../../utils/timeago';
 import { AnimatedButton } from '~/components/AnimatedButton';
 import UserRatingDisplay from '~/components/UserRatingDisplay';
 import { useNotificationSync } from '~/contexts/NotificationSyncContext';
+import { ViewAllCard } from '~/components/ViewAllCard';
 
 interface UserSettings {
   display_name: string | null;
@@ -413,15 +414,35 @@ export default function ProfileScreen() {
       <View className="bg-white mx-4 mt-6 rounded-3xl shadow-sm overflow-hidden">
         <View className="flex-row justify-between items-center px-6 py-5 border-b border-gray-100">
           <Text className="text-2xl font-bold text-gray-900">Active Listings</Text>
-          <View className="rounded-full px-3 py-1" style={{ backgroundColor: COLORS.utOrange }}>
-            <Text className="text-white font-semibold text-sm">{activeListings.length}</Text>
-          </View>
+          <TouchableOpacity 
+            onPress={() => router.push('/(tabs)/my-listings')}
+            className="flex-row items-center"
+          >
+            <View className="rounded-full px-3 py-1 mr-2" style={{ backgroundColor: COLORS.utOrange }}>
+              <Text className="text-white font-semibold text-sm">{activeListings.length}</Text>
+            </View>
+            <Text style={{ color: COLORS.utOrange }} className="font-semibold">See All</Text>
+          </TouchableOpacity>
         </View>
 
         {activeListings.length > 0 ? (
           <FlatList
-            data={activeListings}
-            renderItem={renderListingItem}
+            data={[
+              ...activeListings.slice(0, 3),
+              ...(activeListings.length > 3 ? [{ id: 'view-all', isViewAll: true }] : [])
+            ]}
+            renderItem={({ item }) => {
+              if (item.isViewAll) {
+                return (
+                  <ViewAllCard
+                    title="Active Listings"
+                    count={activeListings.length}
+                    onPress={() => router.push('/(tabs)/my-listings')}
+                  />
+                );
+              }
+              return renderListingItem({ item });
+            }}
             keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -444,15 +465,35 @@ export default function ProfileScreen() {
       <View className="bg-white mx-4 mt-6 rounded-3xl shadow-sm overflow-hidden">
         <View className="flex-row justify-between items-center px-6 py-5 border-b border-gray-100">
           <Text className="text-2xl font-bold text-gray-900">Sold Listings</Text>
-          <View className="bg-green-500 rounded-full px-3 py-1">
-            <Text className="text-white font-semibold text-sm">{soldListings.length}</Text>
-          </View>
+          <TouchableOpacity 
+            onPress={() => router.push('/(tabs)/my-listings')}
+            className="flex-row items-center"
+          >
+            <View className="bg-green-500 rounded-full px-3 py-1 mr-2">
+              <Text className="text-white font-semibold text-sm">{soldListings.length}</Text>
+            </View>
+            <Text style={{ color: COLORS.utOrange }} className="font-semibold">See All</Text>
+          </TouchableOpacity>
         </View>
 
         {soldListings.length > 0 ? (
           <FlatList
-            data={soldListings}
-            renderItem={renderListingItem}
+            data={[
+              ...soldListings.slice(0, 3),
+              ...(soldListings.length > 3 ? [{ id: 'view-all-sold', isViewAll: true }] : [])
+            ]}
+            renderItem={({ item }) => {
+              if (item.isViewAll) {
+                return (
+                  <ViewAllCard
+                    title="Sold Listings"
+                    count={soldListings.length}
+                    onPress={() => router.push('/(tabs)/my-listings')}
+                  />
+                );
+              }
+              return renderListingItem({ item });
+            }}
             keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -469,15 +510,21 @@ export default function ProfileScreen() {
       <View className="bg-white mx-4 mt-6 mb-6 rounded-3xl shadow-sm overflow-hidden">
         <View className="flex-row justify-between items-center px-6 py-5 border-b border-gray-100">
           <Text className="text-2xl font-bold text-gray-900">Reviews</Text>
-          <View className="bg-yellow-500 rounded-full px-3 py-1">
-            <Text className="text-white font-semibold text-sm">{ratings.length}</Text>
-          </View>
+          <TouchableOpacity 
+            onPress={() => router.push('/reviews')}
+            className="flex-row items-center"
+          >
+            <View className="bg-yellow-500 rounded-full px-3 py-1 mr-2">
+              <Text className="text-white font-semibold text-sm">{ratings.length}</Text>
+            </View>
+            <Text style={{ color: COLORS.utOrange }} className="font-semibold">See All</Text>
+          </TouchableOpacity>
         </View>
 
         <View className="px-6 pb-20">
           {ratings.length > 0 ? (
             <FlatList
-              data={ratings}
+              data={ratings.slice(0, 3)}
               renderItem={renderRatingItem}
               keyExtractor={item => item.id}
               scrollEnabled={false}
