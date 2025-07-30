@@ -93,7 +93,14 @@ export const RatingSubmissionModal: React.FC<RatingSubmissionModalProps> = ({
       Alert.alert(
         'Rating Submitted',
         'Thank you for your feedback!',
-        [{ text: 'OK', onPress: handleSuccess }]
+        [
+          { text: 'Add Another Rating', style: 'default', onPress: () => {
+            setRating(0);
+            setComment('');
+            onRatingSubmitted();
+          }},
+          { text: 'Done', style: 'default', onPress: handleSuccess }
+        ]
       );
 
     } catch (error) {
@@ -121,7 +128,14 @@ export const RatingSubmissionModal: React.FC<RatingSubmissionModalProps> = ({
       Alert.alert(
         'Rating Updated',
         'Your rating has been updated!',
-        [{ text: 'OK', onPress: handleSuccess }]
+        [
+          { text: 'Update Another', style: 'default', onPress: () => {
+            setRating(0);
+            setComment('');
+            onRatingSubmitted();
+          }},
+          { text: 'Done', style: 'default', onPress: handleSuccess }
+        ]
       );
 
     } catch (error) {
@@ -228,6 +242,13 @@ export const RatingSubmissionModal: React.FC<RatingSubmissionModalProps> = ({
                   className="border border-gray-300 rounded-xl p-4 text-base text-gray-900 bg-gray-50"
                   style={{ textAlignVertical: 'top' }}
                   maxLength={500}
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                  onSubmitEditing={() => {
+                    if (rating > 0 && !isSubmitting) {
+                      handleSubmit();
+                    }
+                  }}
                 />
                 <Text className="text-gray-500 text-sm mt-2 text-right">
                   {comment.length}/500
