@@ -8,7 +8,7 @@ import { Star, CheckCircle2, Settings2, User, Calendar, MapPin, Plus, Edit3, Eye
 import { getTimeAgo } from '../../utils/timeago';
 import { AnimatedButton } from '~/components/AnimatedButton';
 import UserRatingDisplay from '~/components/UserRatingDisplay';
-import { useNotificationCount } from '~/lib/useNotifications';
+import { useNotificationSync } from '~/contexts/NotificationSyncContext';
 
 interface UserSettings {
   display_name: string | null;
@@ -39,7 +39,7 @@ interface Rating {
 export default function ProfileScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const { unreadCount } = useNotificationCount();
+  const { unreadCount } = useNotificationSync();
   const [profile, setProfile] = useState<UserSettings | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);

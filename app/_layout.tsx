@@ -20,6 +20,8 @@ import Header from "~/components/Header";
 import TabBar from "~/components/TabBar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider } from '../contexts/AuthContext';
+import { NotificationProvider } from '../contexts/NotificationContext';
+import { NotificationSyncProvider } from '../contexts/NotificationSyncContext';
 import { Slot } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -52,30 +54,34 @@ function InitialLayout() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <View className="flex-1">
-        <SafeAreaView className="flex-1" edges={['top']}>
-          <Stack 
-            screenOptions={{ 
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen 
-              name="(tabs)" 
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen 
-              name="(modals)" 
-              options={{ 
-                headerShown: false,
-                presentation: 'modal',
-              }} 
-            />
-          </Stack>
-        </SafeAreaView>
-      </View>
+      <NotificationSyncProvider>
+        <NotificationProvider>
+          <View className="flex-1">
+            <SafeAreaView className="flex-1" edges={['top']}>
+              <Stack 
+                screenOptions={{ 
+                  headerShown: false,
+                }}
+              >
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen 
+                  name="(tabs)" 
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen 
+                  name="(modals)" 
+                  options={{ 
+                    headerShown: false,
+                    presentation: 'modal',
+                  }} 
+                />
+              </Stack>
+            </SafeAreaView>
+          </View>
+        </NotificationProvider>
+      </NotificationSyncProvider>
     </AuthProvider>
   );
 }

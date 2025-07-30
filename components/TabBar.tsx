@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useRef, useEffect, useState } from "react";
 import { useAuth } from "~/contexts/AuthContext";
 import { supabase } from "~/lib/supabase";
-import { useNotificationCount } from "~/lib/useNotifications";
+import { useNotificationSync } from "~/contexts/NotificationSyncContext";
 
 const tabRoutes = [
   { name: "index", icon: Home },
@@ -25,7 +25,7 @@ export default function TabBar({
 }) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { unreadCount } = useNotificationCount();
+  const { unreadCount } = useNotificationSync();
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const tabAnimations = useRef(tabRoutes.map(() => new Animated.Value(1))).current;
   

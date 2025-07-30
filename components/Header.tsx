@@ -5,13 +5,13 @@ import { usePathname, useRouter } from 'expo-router';
 import Icon from '../assets/ios-light.png';
 import { supabase } from '~/lib/supabase';
 import { useAuth } from '~/contexts/AuthContext';
-import { useNotificationCount } from '~/lib/useNotifications';
+import { useNotificationSync } from '~/contexts/NotificationSyncContext';
 
 function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
-  const { unreadCount } = useNotificationCount();
+  const { unreadCount } = useNotificationSync();
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   // Fetch unread message count and set up real-time updates

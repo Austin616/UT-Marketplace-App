@@ -89,6 +89,70 @@ export function useNotifications() {
     return success;
   }, [user?.email]);
 
+  // Toggle notification read status
+  const toggleReadStatus = useCallback(async (notificationId: string) => {
+    try {
+      const notification = notifications.find(n => n.id === notificationId);
+      if (!notification) return false;
+
+      const newReadStatus = !notification.is_read;
+      
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: newReadStatus })
+        .eq('id', notificationId);
+      
+      if (error) throw error;
+
+      // The real-time subscription will handle state updates
+      return true;
+    } catch (error) {
+      console.error('Error toggling notification read status:', error);
+      return false;
+    }
+  }, [notifications]);
+
+  // Delete a single notification
+  const deleteNotification = useCallback(async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId);
+      
+      if (error) throw error;
+
+      // The real-time subscription will handle state updates
+      return true;
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      return false;
+    }
+  }, []);
+
+  // Clear all notifications
+  const clearAllNotifications = useCallback(async () => {
+    if (!user?.email) return false;
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', user.email);
+      
+      if (error) throw error;
+
+      // Immediately update local state for better UX
+      setNotifications([]);
+      setUnreadCount(0);
+
+      return true;
+    } catch (error) {
+      console.error('Error clearing all notifications:', error);
+      return false;
+    }
+  }, [user?.email]);
+
   // Refresh notifications
   const refresh = useCallback(() => {
     loadNotifications();
@@ -119,7 +183,9 @@ export function useNotifications() {
           if (payload.eventType === 'INSERT') {
             const newNotification = payload.new;
             setNotifications(prev => [newNotification, ...prev]);
-            setUnreadCount(prev => prev + 1);
+            if (!newNotification.is_read) {
+              setUnreadCount(prev => prev + 1);
+            }
           } else if (payload.eventType === 'UPDATE') {
             const updatedNotification = payload.new;
             setNotifications(prev => 
@@ -133,6 +199,16 @@ export function useNotifications() {
               setUnreadCount(prev => Math.max(0, prev - 1));
             } else if (payload.old.is_read === true && payload.new.is_read === false) {
               setUnreadCount(prev => prev + 1);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const deletedNotification = payload.old;
+            setNotifications(prev => 
+              prev.filter(n => n.id !== deletedNotification.id)
+            );
+            
+            // Decrease count if deleted notification was unread
+            if (!deletedNotification.is_read) {
+              setUnreadCount(prev => Math.max(0, prev - 1));
             }
           }
         }
@@ -150,6 +226,9 @@ export function useNotifications() {
     loading,
     markAsRead,
     markAllAsRead,
+    toggleReadStatus,
+    deleteNotification,
+    clearAllNotifications,
     refresh
   };
 }
@@ -195,14 +274,21 @@ export function useNotificationCount() {
           console.log('Notification count update:', payload);
           
           if (payload.eventType === 'INSERT') {
-            // New notification - increment count
-            setUnreadCount(prev => prev + 1);
+            // New notification - increment count if unread
+            if (!payload.new.is_read) {
+              setUnreadCount(prev => prev + 1);
+            }
           } else if (payload.eventType === 'UPDATE') {
             // Check if read status changed
             if (payload.old.is_read === false && payload.new.is_read === true) {
               setUnreadCount(prev => Math.max(0, prev - 1));
             } else if (payload.old.is_read === true && payload.new.is_read === false) {
               setUnreadCount(prev => prev + 1);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            // Notification deleted - decrease count if it was unread
+            if (!payload.old.is_read) {
+              setUnreadCount(prev => Math.max(0, prev - 1));
             }
           }
         }
