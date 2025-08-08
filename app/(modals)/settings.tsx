@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert, Image, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Image, TextInput, ActivityIndicator, Switch, Linking } from 'react-native';
 import { useAuth } from '~/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { LogOut, Camera, User, Save } from 'lucide-react-native';
+import { LogOut, Camera, User, Save, Bell, Shield, HelpCircle, Mail, Star, Moon, Palette, Globe, Info, ChevronRight, Heart, MessageCircle, Trash2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ModalHeader from '~/components/ModalHeader';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '~/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import { COLORS } from '~/theme/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
+import { useColorScheme } from 'react-native';
+import { useSettings } from '~/contexts/SettingsContext';
 
 interface UserSettings {
   display_name: string | null;
@@ -24,6 +28,17 @@ export default function Settings() {
   const [bio, setBio] = useState('');
   const [editingBio, setEditingBio] = useState(false);
   const [savingBio, setSavingBio] = useState(false);
+  const colorScheme = useColorScheme();
+  const {
+    notificationsEnabled,
+    darkModeEnabled,
+    locationEnabled,
+    hapticFeedbackEnabled,
+    setNotificationsEnabled,
+    setDarkModeEnabled,
+    setLocationEnabled,
+    setHapticFeedbackEnabled
+  } = useSettings();
 
   useEffect(() => {
     if (user) fetchSettings();
@@ -216,6 +231,239 @@ export default function Settings() {
                 {settings?.bio || 'No bio yet'}
               </Text>
             )}
+          </View>
+        </View>
+
+        {/* App Preferences */}
+        <View className="bg-white p-4 mb-6">
+          <Text className="text-xl font-bold mb-4">App Preferences</Text>
+          
+          <View className="space-y-4">
+            {/* Notifications */}
+            <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Bell size={16} color="#BF5700" />
+                </View>
+                <View>
+                  <Text className="font-semibold text-gray-900">Notifications</Text>
+                  <Text className="text-sm text-gray-500">Get updates on your listings</Text>
+                </View>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={setNotificationsEnabled}
+                trackColor={{ false: '#D1D5DB', true: '#BF5700' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+
+            {/* Dark Mode */}
+            <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Moon size={16} color="#BF5700" />
+                </View>
+                <View>
+                  <Text className="font-semibold text-gray-900">Dark Mode</Text>
+                  <Text className="text-sm text-gray-500">Switch to dark theme</Text>
+                </View>
+              </View>
+              <Switch
+                value={darkModeEnabled}
+                onValueChange={setDarkModeEnabled}
+                trackColor={{ false: '#D1D5DB', true: '#BF5700' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+
+            {/* Location */}
+            <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Globe size={16} color="#BF5700" />
+                </View>
+                <View>
+                  <Text className="font-semibold text-gray-900">Location Services</Text>
+                  <Text className="text-sm text-gray-500">Show location in listings</Text>
+                </View>
+              </View>
+              <Switch
+                value={locationEnabled}
+                onValueChange={setLocationEnabled}
+                trackColor={{ false: '#D1D5DB', true: '#BF5700' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+
+            {/* Haptic Feedback */}
+            <View className="flex-row items-center justify-between py-3">
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Palette size={16} color="#BF5700" />
+                </View>
+                <View>
+                  <Text className="font-semibold text-gray-900">Haptic Feedback</Text>
+                  <Text className="text-sm text-gray-500">Vibration for button taps</Text>
+                </View>
+              </View>
+              <Switch
+                value={hapticFeedbackEnabled}
+                onValueChange={setHapticFeedbackEnabled}
+                trackColor={{ false: '#D1D5DB', true: '#BF5700' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Quick Links */}
+        <View className="bg-white p-4 mb-6">
+          <Text className="text-xl font-bold mb-4">Quick Links</Text>
+          
+          <View className="space-y-2">
+            <TouchableOpacity
+              onPress={() => router.push('/favorites/favorite')}
+              className="flex-row items-center justify-between py-3 border-b border-gray-100"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Heart size={16} color="#BF5700" />
+                </View>
+                <Text className="font-semibold text-gray-900">Favorites</Text>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/messages')}
+              className="flex-row items-center justify-between py-3 border-b border-gray-100"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <MessageCircle size={16} color="#BF5700" />
+                </View>
+                <Text className="font-semibold text-gray-900">Messages</Text>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push('/my-listings')}
+              className="flex-row items-center justify-between py-3"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <User size={16} color="#BF5700" />
+                </View>
+                <Text className="font-semibold text-gray-900">My Listings</Text>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Support & Feedback */}
+        <View className="bg-white p-4 mb-6">
+          <Text className="text-xl font-bold mb-4">Support & Feedback</Text>
+          
+          <View className="space-y-2">
+            <TouchableOpacity
+              onPress={() => Linking.openURL('mailto:support@utmarketplace.com?subject=UT Marketplace Support')}
+              className="flex-row items-center justify-between py-3 border-b border-gray-100"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Mail size={16} color="#BF5700" />
+                </View>
+                <View>
+                  <Text className="font-semibold text-gray-900">Contact Support</Text>
+                  <Text className="text-sm text-gray-500">Get help with your account</Text>
+                </View>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => Alert.alert('Help & FAQ', 'Feature coming soon! Contact support for immediate assistance.')}
+              className="flex-row items-center justify-between py-3 border-b border-gray-100"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <HelpCircle size={16} color="#BF5700" />
+                </View>
+                <Text className="font-semibold text-gray-900">Help & FAQ</Text>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => Linking.openURL('https://apps.apple.com/app/id123456789')}
+              className="flex-row items-center justify-between py-3 border-b border-gray-100"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Star size={16} color="#BF5700" />
+                </View>
+                <View>
+                  <Text className="font-semibold text-gray-900">Rate the App</Text>
+                  <Text className="text-sm text-gray-500">Leave a review on the App Store</Text>
+                </View>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => Alert.alert('Privacy Policy', 'Your privacy is important to us. We only collect necessary data to provide our services.')}
+              className="flex-row items-center justify-between py-3"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-orange-50 rounded-full items-center justify-center mr-3">
+                  <Shield size={16} color="#BF5700" />
+                </View>
+                <Text className="font-semibold text-gray-900">Privacy Policy</Text>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Account Actions */}
+        <View className="bg-white p-4 mb-6">
+          <Text className="text-xl font-bold mb-4">Account</Text>
+          
+          <View className="space-y-2">
+            <TouchableOpacity
+              onPress={() => Alert.alert(
+                'Delete Account',
+                'Are you sure you want to delete your account? This action cannot be undone.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Delete', 
+                    style: 'destructive',
+                    onPress: () => Alert.alert('Feature coming soon', 'Please contact support to delete your account.')
+                  }
+                ]
+              )}
+              className="flex-row items-center justify-between py-3"
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 bg-red-50 rounded-full items-center justify-center mr-3">
+                  <Trash2 size={16} color="#EF4444" />
+                </View>
+                <Text className="font-semibold text-red-600">Delete Account</Text>
+              </View>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* App Info */}
+        <View className="bg-white p-4 mb-6">
+          <View className="flex-row items-center justify-center">
+            <Info size={16} color="#9CA3AF" />
+            <Text className="text-gray-500 ml-2">UT Marketplace v1.0.0</Text>
           </View>
         </View>
 

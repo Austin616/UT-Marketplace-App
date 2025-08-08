@@ -1,12 +1,15 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, FlatList, ActivityIndicator, Animated, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, FlatList, ActivityIndicator, Animated, Dimensions, Pressable } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Plus, LogIn, BookOpen, Smartphone, Armchair, Shirt, Home, Wrench, Flame, MessageCircle, Users, Star, CheckCircle, ShieldCheck, Zap, TrendingUp, Eye, Heart, Sparkles, ArrowRight } from 'lucide-react-native';
+import { Search, Plus, LogIn, BookOpen, Smartphone, Armchair, Shirt, Home, Wrench, Flame, MessageCircle, Users, Star, CheckCircle, ShieldCheck, Zap, TrendingUp, Eye, Heart, Sparkles, ArrowRight, MapPin, ChevronRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '~/contexts/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '~/lib/supabase';
 import { COLORS } from '~/theme/colors';
 import * as Haptics from 'expo-haptics';
+import Reanimated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useSettings } from '~/contexts/SettingsContext';
 
 const { width } = Dimensions.get('window');
 
@@ -26,329 +29,368 @@ interface Item {
 }
 
 const categories: Category[] = [
-  { id: 1, name: 'Textbooks', icon: <BookOpen size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 2, name: 'Electronics', icon: <Smartphone size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 3, name: 'Furniture', icon: <Armchair size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 4, name: 'Clothing', icon: <Shirt size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 5, name: 'Housing', icon: <Home size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
-  { id: 6, name: 'Services', icon: <Wrench size={18} color={COLORS.utOrange} />, color: COLORS.iconBg },
+  { id: 1, name: 'Textbooks', icon: <BookOpen size={18} color="#BF5700" />, color: COLORS.iconBg },
+  { id: 2, name: 'Electronics', icon: <Smartphone size={18} color="#BF5700" />, color: COLORS.iconBg },
+  { id: 3, name: 'Furniture', icon: <Armchair size={18} color="#BF5700" />, color: COLORS.iconBg },
+  { id: 4, name: 'Clothing', icon: <Shirt size={18} color="#BF5700" />, color: COLORS.iconBg },
+  { id: 5, name: 'Housing', icon: <Home size={18} color="#BF5700" />, color: COLORS.iconBg },
+  { id: 6, name: 'Services', icon: <Wrench size={18} color="#BF5700" />, color: COLORS.iconBg },
 ];
 
-// Animated Button Component with Press Effects
-const AnimatedButton = ({ 
-  onPress, 
-  children, 
-  style, 
-  hapticType = 'light',
-  scaleValue = 0.96,
-  ...props 
-}: {
-  onPress: () => void;
-  children: React.ReactNode;
-  style: any;
-  hapticType?: 'light' | 'medium' | 'heavy';
-  scaleValue?: number;
-  [key: string]: any;
-}) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+// Home Content Section
+const HomeContent = () => {
+  const router = useRouter();
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
 
   const handlePressIn = () => {
-    // Haptic feedback
-    if (hapticType === 'light') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (hapticType === 'medium') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (hapticType === 'heavy') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-    // Scale animation
-    Animated.spring(scaleAnim, {
-      toValue: scaleValue,
-      useNativeDriver: true,
-      tension: 300,
-      friction: 10,
-    }).start();
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(0.8, { damping: 15, stiffness: 400 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      tension: 300,
-      friction: 10,
-    }).start();
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
 
-  const handlePress = () => {
-    // Additional success haptic for navigation
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onPress();
+  const getTimeOfDayGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   };
 
   return (
-    <TouchableOpacity
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onPress={handlePress}
-      activeOpacity={1}
-      {...props}
-    >
-      <Animated.View
-        style={[
-          style,
-          {
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {children}
-      </Animated.View>
-    </TouchableOpacity>
-  );
-};
+    <View className="px-6 pb-6 pt-6">
+      {/* Greeting */}
+      <View className="mb-6">
+        <Text className="text-3xl font-black text-gray-900 mb-1">
+          {getTimeOfDayGreeting()}
+        </Text>
+        <Text className="text-lg text-gray-600 font-medium">
+          Ready to find something great?
+        </Text>
+      </View>
 
-// Live Activity Ticker Component
-const LiveTicker = () => {
-  const [messages] = useState([
-    "🔥 50+ new listings this week",
-    "🎉 Join 500+ Longhorn students", 
-    "👀 Amazing deals happening now",
-    "⭐ Trusted by your fellow Horns",
-  ]);
-  const [index, setIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      
-      setTimeout(() => {
-        setIndex(i => (i + 1) % messages.length);
-      }, 300);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [messages.length, fadeAnim]);
-
-  return (
-    <View className="w-full flex items-center py-4 px-6">
-      <Animated.View 
-        style={{
-          opacity: fadeAnim,
-        }}
-      >
-        <View
+      {/* Search Bar */}
+      <Reanimated.View style={animatedStyle}>
+        <Pressable
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          onPress={() => router.push('/browse')}
+          className="bg-white rounded-lg p-4 flex-row items-center border border-gray-200 mb-6"
           style={{
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-            borderRadius: 24,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: '#fef3c7',
-            borderWidth: 0,
+            shadowColor: '#BF5700',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 3,
           }}
         >
-          <Flame size={16} color="#d97706" />
-          <Text
-            style={{
-              color: '#92400e',
-              fontWeight: '600',
-              marginLeft: 8,
-              fontSize: 14,
-            }}
-          >
-            {messages[index]}
+          <Search size={20} color="#9CA3AF" />
+          <Text className="ml-3 text-gray-500 text-base flex-1 font-medium">
+            What are you looking for?
           </Text>
-        </View>
-      </Animated.View>
-    </View>
-  );
-};
+          <ChevronRight size={16} color="#9CA3AF" />
+        </Pressable>
+      </Reanimated.View>
 
-// Hero Section with Enhanced Animations
-const HeroSection = () => {
-  const router = useRouter();
-  const { user } = useAuth();
-
-  return (
-    <View className="px-6 mb-8">
-      <View 
-        style={{
-          backgroundColor: 'white',
-          borderRadius: 24,
-          padding: 28,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.05,
-          shadowRadius: 12,
-          elevation: 3,
-        }}
-      >
-        <View className="mb-6">
-          <Text className="text-gray-900 text-2xl font-bold mb-3 leading-tight">
-            Your campus marketplace awaits
-          </Text>
-          <Text className="text-gray-600 text-base leading-relaxed">
-            Connect with fellow Longhorns to buy, sell, and discover amazing deals right on campus.
-          </Text>
-        </View>
-
-        <View className="flex-row gap-4 mb-6">
-          <AnimatedButton 
-            onPress={() => router.push('/create')}
-            hapticType="medium"
-            scaleValue={0.95}
-            style={{
-              backgroundColor: COLORS.utOrange,
-              paddingHorizontal: 24,
-              paddingVertical: 14,
-              borderRadius: 12,
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'center',
-              shadowColor: COLORS.utOrange,
-              shadowOffset: { width: 0, height: 3 },
-              shadowOpacity: 0.25,
-              shadowRadius: 6,
-              elevation: 4,
-            }}
-          >
-            <Plus size={18} color="white" />
-            <Text style={{ color: 'white', fontWeight: '700', marginLeft: 8, fontSize: 16 }}>
-              Create Listing
-            </Text>
-          </AnimatedButton>
-
-          <AnimatedButton 
-            onPress={() => router.push('/browse')}
-            hapticType="light"
-            scaleValue={0.97}
-            style={{
-              borderColor: '#d1d5db',
-              borderWidth: 1.5,
-              paddingHorizontal: 24,
-              paddingVertical: 14,
-              borderRadius: 12,
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'center',
-              backgroundColor: 'white',
-            }}
-          >
-            <Search size={18} color="#6b7280" />
-            <Text style={{ color: '#374151', fontWeight: '600', marginLeft: 8, fontSize: 16 }}>
-              Browse
-            </Text>
-          </AnimatedButton>
-        </View>
-
-        <View className="flex-row items-center justify-center">
-          <Text className="text-2xl mr-2">🤘</Text>
-          <Text style={{ color: COLORS.utOrange, fontSize: 13, fontWeight: '700' }}>
-            Hook &apos;em Horns!
-          </Text>
-        </View>
+      {/* Quick Actions */}
+      <View className="flex-row gap-3">
+        <QuickActionCard 
+          title="Sell Item"
+          description="List something"
+          icon={<Plus size={18} color="#BF5700" />}
+          onPress={() => router.push('/create')}
+        />
+        <QuickActionCard 
+          title="Browse All"
+          description="Find deals"
+          icon={<Search size={18} color="#BF5700" />}
+          onPress={() => router.push('/browse')}
+        />
       </View>
     </View>
   );
 };
 
-// Modern Categories
-const CategoriesSection = () => {
+// Quick Action Card Component
+const QuickActionCard = ({ title, description, icon, onPress }: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  onPress: () => void;
+}) => {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(0.8, { damping: 15, stiffness: 400 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(1, { damping: 15, stiffness: 400 });
+  };
+
+  return (
+    <Reanimated.View style={[{ flex: 1 }, animatedStyle]}>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={onPress}
+        className="bg-white rounded-lg p-4 border border-gray-200 flex-1"
+        style={{
+          shadowColor: '#BF5700',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
+      >
+        <View className="w-10 h-10 bg-orange-50 rounded-full items-center justify-center mb-3">
+          {icon}
+        </View>
+        <Text className="text-gray-900 font-bold text-base mb-1">{title}</Text>
+        <Text className="text-gray-500 text-sm font-medium">{description}</Text>
+      </Pressable>
+    </Reanimated.View>
+  );
+};
+
+// Category Item Component
+const CategoryItem = ({ item }: { item: Category }) => {
   const router = useRouter();
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(0.8, { damping: 15, stiffness: 400 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(1, { damping: 15, stiffness: 400 });
+  };
+
+  return (
+    <Reanimated.View style={animatedStyle}>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={() => router.push({
+          pathname: '/browse',
+          params: { category: item.name }
+        })}
+        className="mb-3 flex-row items-center justify-between rounded-lg p-4 border border-gray-200 bg-white mx-6"
+        style={{
+          shadowColor: '#BF5700',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
+      >
+        <View className="flex-row items-center gap-4">
+          <View className="w-12 h-12 bg-orange-50 rounded-full items-center justify-center">
+            {item.icon}
+          </View>
+          <View>
+            <Text className="font-bold text-lg text-gray-900">
+              {item.name}
+            </Text>
+            <Text className="text-sm text-gray-500 font-medium">
+              Browse {item.name.toLowerCase()}
+            </Text>
+          </View>
+        </View>
+        <ChevronRight size={20} color="#BF5700" />
+      </Pressable>
+    </Reanimated.View>
+  );
+};
+
+// Categories Section with UT Dining-style cards
+const CategoriesSection = () => {
+  const renderCategoryItem = ({ item }: { item: Category }) => (
+    <CategoryItem item={item} />
+  );
 
   return (
     <View className="mb-8">
-      <View className="flex-row justify-between items-center px-6 mb-5">
-        <Text className="text-xl font-bold text-gray-900">Categories</Text>
-        <TouchableOpacity 
-          onPress={() => router.push('/browse')}
-          className="flex-row items-center"
-        >
-          <Text style={{ color: COLORS.utOrange, fontWeight: '600', fontSize: 15 }}>See All</Text>
-          <ArrowRight size={16} color={COLORS.utOrange} style={{ marginLeft: 4 }} />
-        </TouchableOpacity>
+      <View className="px-6 mb-4">
+        <Text className="text-2xl font-black text-gray-900 mb-1">Browse Categories</Text>
+        <Text className="text-gray-500 font-medium">Find exactly what you need</Text>
       </View>
       
       <FlatList
         data={categories}
-        renderItem={({ item }) => (
-          <AnimatedButton 
-            onPress={() => router.push({
-              pathname: '/browse',
-              params: { category: item.name }
-            })}
-            hapticType="light"
-            scaleValue={0.94}
-            style={{ marginRight: 16 }}
-          >
-            <View className="items-center">
-              <View
-                style={{
-                  width: 64,
-                  height: 64,
-                  backgroundColor: item.color,
-                  borderRadius: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 12,
-                  shadowColor: item.color,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 8,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: '#fed7aa',
-                }}
-              >
-                {item.icon}
-              </View>
-              <Text className="text-xs text-gray-700 font-medium text-center" style={{ width: 70 }}>
-                {item.name}
-              </Text>
-            </View>
-          </AnimatedButton>
-        )}
+        renderItem={renderCategoryItem}
         keyExtractor={item => item.id.toString()}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 24, paddingRight: 24 }}
+        scrollEnabled={false}
+        contentContainerStyle={{ paddingBottom: 0 }}
       />
     </View>
   );
 };
 
-// Trust Badge
-const TrustBadge = () => {
+// Enhanced Trust Section
+const TrustSection = () => {
   return (
     <View className="px-6 mb-8">
-      <View
+      <LinearGradient
+        colors={['#f0fdf4', '#ecfdf5']}
         style={{
-          backgroundColor: '#ecfdf5',
-          borderRadius: 16,
-          padding: 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
+          borderRadius: 20,
+          padding: 24,
           borderWidth: 1,
-          borderColor: '#a7f3d0',
+          borderColor: '#bbf7d0',
         }}
       >
-        <ShieldCheck size={24} color="#059669" />
-        <Text style={{ color: '#065f46', fontWeight: '700', fontSize: 16, marginLeft: 12 }}>
-          Verified UT Students Only
-        </Text>
-      </View>
+        <View className="items-center mb-6">
+          <View className="w-16 h-16 rounded-full bg-green-100 items-center justify-center mb-4">
+            <ShieldCheck size={32} color="#059669" />
+          </View>
+          <Text className="text-xl font-black text-green-900 text-center mb-2">
+            Safe & Secure Trading
+          </Text>
+          <Text className="text-green-700 text-center font-medium">
+            Every user is a verified UT student
+          </Text>
+        </View>
+        
+        <View className="flex-row justify-between">
+          <View className="items-center flex-1">
+            <View className="w-10 h-10 rounded-full bg-green-50 items-center justify-center mb-2">
+              <Users size={18} color="#059669" />
+            </View>
+            <Text className="text-green-900 font-bold text-lg">500+</Text>
+            <Text className="text-green-600 text-xs font-medium">Students</Text>
+          </View>
+          <View className="items-center flex-1">
+            <View className="w-10 h-10 rounded-full bg-green-50 items-center justify-center mb-2">
+              <Star size={18} color="#059669" />
+            </View>
+            <Text className="text-green-900 font-bold text-lg">4.9★</Text>
+            <Text className="text-green-600 text-xs font-medium">Rating</Text>
+          </View>
+          <View className="items-center flex-1">
+            <View className="w-10 h-10 rounded-full bg-green-50 items-center justify-center mb-2">
+              <CheckCircle size={18} color="#059669" />
+            </View>
+            <Text className="text-green-900 font-bold text-lg">100%</Text>
+            <Text className="text-green-600 text-xs font-medium">Verified</Text>
+          </View>
+        </View>
+      </LinearGradient>
     </View>
+  );
+};
+
+// Listing Item Component
+const ListingItem = ({ item }: { item: Item }) => {
+  const router = useRouter();
+  const { locationEnabled } = useSettings();
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(0.8, { damping: 15, stiffness: 400 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    opacity.value = withSpring(1, { damping: 15, stiffness: 400 });
+  };
+
+  return (
+    <Reanimated.View style={[animatedStyle, { marginRight: 16, width: 170 }]}>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={() => router.push(`/listing/${item.id}`)}
+        style={{
+          backgroundColor: 'white',
+          borderRadius: 12,
+          overflow: 'hidden',
+          shadowColor: '#BF5700',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 3,
+          borderWidth: 1,
+          borderColor: 'rgba(191, 87, 0, 0.1)',
+        }}
+      >
+        <View style={{ position: 'relative' }}>
+          <Image
+            source={{ uri: item.image }}
+            style={{ width: '100%', height: 120 }}
+            resizeMode="cover"
+          />
+          <View style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            borderRadius: 12,
+            padding: 4,
+          }}>
+            <Heart size={14} color="#ef4444" />
+          </View>
+        </View>
+        <View className="p-4">
+          <Text className="font-bold text-gray-900 text-base mb-2" numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={{ color: COLORS.utOrange, fontWeight: '800', fontSize: 16 }}>
+            ${item.price}
+          </Text>
+          {locationEnabled && (
+            <View className="flex-row items-center mt-2">
+              <MapPin size={12} color="#9ca3af" />
+              <Text className="text-gray-500 text-xs ml-1" numberOfLines={1}>{item.location}</Text>
+            </View>
+          )}
+        </View>
+      </Pressable>
+    </Reanimated.View>
   );
 };
 
@@ -391,99 +433,33 @@ export default function HomeScreen() {
   };
 
   const renderListingItem = ({ item }: { item: Item }) => (
-    <AnimatedButton 
-      onPress={() => router.push(`/listing/${item.id}`)}
-      hapticType="light"
-      scaleValue={0.96}
-      style={{ marginRight: 16, width: 160 }}
-    >
-      <View 
-        style={{
-          backgroundColor: 'white',
-          borderRadius: 16,
-          overflow: 'hidden',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 3 },
-          shadowOpacity: 0.06,
-          shadowRadius: 12,
-          elevation: 3,
-        }}
-      >
-        <Image
-          source={{ uri: item.image }}
-          style={{ width: '100%', height: 120 }}
-          resizeMode="cover"
-        />
-        <View className="p-4">
-          <Text className="font-semibold text-gray-900 text-sm mb-2" numberOfLines={2}>
-            {item.title}
-          </Text>
-          <Text style={{ color: COLORS.utOrange, fontWeight: 'bold', fontSize: 16 }}>
-            ${item.price}
-          </Text>
-          <Text className="text-gray-500 text-xs mt-1">{item.location}</Text>
-        </View>
-      </View>
-    </AnimatedButton>
+    <ListingItem item={item} />
   );
 
   return (
-    <View className="flex-1" style={{ backgroundColor: '#fafafa' }}>
-      {/* Enhanced Search Bar */}
-      <View className="px-6 pt-4 pb-2">
-        <AnimatedButton 
-          onPress={() => router.push('/browse')}
-          hapticType="light"
-          scaleValue={0.98}
-          style={{
-            backgroundColor: 'white',
-            borderRadius: 16,
-            paddingHorizontal: 20,
-            paddingVertical: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05,
-            shadowRadius: 6,
-            elevation: 2,
-          }}
-        >
-          <Search size={22} color="#9ca3af" />
-          <Text className="ml-4 text-gray-500 text-base flex-1">What are you looking for?</Text>
-        </AnimatedButton>
-      </View>
-
-      {/* Live Ticker */}
-      <LiveTicker />
-
+    <View style={{ flex: 1, backgroundColor: '#f9fafb' }}>      
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* Hero Section */}
-        <HeroSection />
+        {/* Home Content */}
+        <HomeContent />
 
         {/* Categories */}
         <CategoriesSection />
 
         {/* Recent Listings */}
         <View className="mb-8">
-          <View className="flex-row justify-between items-center px-6 mb-5">
-            <Text className="text-xl font-bold text-gray-900">Recent Listings</Text>
-            <TouchableOpacity 
-              onPress={() => router.push('/browse')}
-              className="flex-row items-center"
-            >
-              <Text style={{ color: COLORS.utOrange, fontWeight: '600', fontSize: 15 }}>See All</Text>
-              <ArrowRight size={16} color={COLORS.utOrange} style={{ marginLeft: 4 }} />
-            </TouchableOpacity>
+          <View className="px-6 mb-4">
+            <Text className="text-2xl font-black text-gray-900 mb-1">Recent Listings</Text>
+            <Text className="text-gray-500 font-medium">Fresh deals from your fellow Horns</Text>
           </View>
           
           {recentLoading ? (
-            <View className="py-12">
+            <View className="py-16">
               <ActivityIndicator size="large" color={COLORS.utOrange} />
+              <Text className="text-center text-gray-500 mt-4 font-medium">Loading listings...</Text>
             </View>
           ) : recentListings.length > 0 ? (
             <FlatList
@@ -496,13 +472,17 @@ export default function HomeScreen() {
             />
           ) : (
             <View className="px-6">
-              <Text className="text-gray-500 text-center py-12">No recent listings found.</Text>
+              <View className="bg-white rounded-lg p-8 items-center border border-gray-200">
+                <Text className="text-6xl mb-4">📦</Text>
+                <Text className="text-gray-700 text-center font-bold text-lg mb-2">No listings yet</Text>
+                <Text className="text-gray-500 text-center font-medium">Be the first to create a listing!</Text>
+              </View>
             </View>
           )}
         </View>
 
-        {/* Trust Badge */}
-        <TrustBadge />
+        {/* Trust Section */}
+        <TrustSection />
       </ScrollView>
     </View>
   );

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { COLORS } from '~/theme/colors';
 import { MapPin } from 'lucide-react-native';
+import { useSettings } from '~/contexts/SettingsContext';
 
 interface ListingCardProps {
   id: number;
@@ -27,6 +28,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
   images,
   onPress,
 }) => {
+  const { locationEnabled } = useSettings();
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -59,12 +62,14 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <Text className="text-base text-gray-700" numberOfLines={1}>
           {title}
         </Text>
-        <View className="flex-row items-center mt-1">
-          <MapPin size={14} color={COLORS.light.grey} />
-          <Text className="text-sm text-gray-500 ml-1" numberOfLines={1}>
-            {location}
-          </Text>
-        </View>
+        {locationEnabled && (
+          <View className="flex-row items-center mt-1">
+            <MapPin size={14} color={COLORS.light.grey} />
+            <Text className="text-sm text-gray-500 ml-1" numberOfLines={1}>
+              {location}
+            </Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );

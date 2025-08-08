@@ -93,9 +93,8 @@ export default function CreateScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <SafeAreaView className="flex-1" edges={['top']}>
-        <ScrollView
+    <View className="flex-1 bg-gray-50">      
+      <ScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -177,7 +176,6 @@ export default function CreateScreen() {
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
     </View>
   );
 }

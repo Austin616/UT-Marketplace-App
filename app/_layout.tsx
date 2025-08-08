@@ -22,6 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { NotificationSyncProvider } from '../contexts/NotificationSyncContext';
+import { SettingsProvider } from '../contexts/SettingsContext';
 import { Slot } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -56,30 +57,32 @@ export default function RootLayout() {
     <AuthProvider>
       <NotificationSyncProvider>
         <NotificationProvider>
-          <View className="flex-1">
-            <SafeAreaView className="flex-1" edges={['top']}>
-              <Stack 
-                screenOptions={{ 
-                  headerShown: false,
-                }}
-              >
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen 
-                  name="(tabs)" 
-                  options={{
+          <SettingsProvider>
+            <View className="flex-1">
+              <SafeAreaView className="flex-1" edges={['top']}>
+                <Stack 
+                  screenOptions={{ 
                     headerShown: false,
                   }}
-                />
-                <Stack.Screen 
-                  name="(modals)" 
-                  options={{ 
-                    headerShown: false,
-                    presentation: 'modal',
-                  }} 
-                />
-              </Stack>
-            </SafeAreaView>
-          </View>
+                >
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen 
+                    name="(tabs)" 
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="(modals)" 
+                    options={{ 
+                      headerShown: false,
+                      presentation: 'modal',
+                    }} 
+                  />
+                </Stack>
+              </SafeAreaView>
+            </View>
+          </SettingsProvider>
         </NotificationProvider>
       </NotificationSyncProvider>
     </AuthProvider>

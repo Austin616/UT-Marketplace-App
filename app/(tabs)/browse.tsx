@@ -219,51 +219,51 @@ export default function BrowseScreen() {
     <View className="flex-1 bg-gray-50 pb-24">
       {/* Search */}
       <SearchBar
-        value={searchQuery}
-        onChangeText={handleSearch}
-        onFilterPress={() => setShowFilters(true)}
-      />
-
-      {/* Categories */}
-      <CategoryButtons
-        selectedCategory={selectedCategory}
-        onCategoryPress={handleCategoryPress}
-      />
-
-      {/* Listings */}
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.utOrange} />
-        </View>
-      ) : (
-        <FlatList
-          data={listings}
-          keyExtractor={item => item.id.toString()}
-          numColumns={2}
-          renderItem={({ item }) => (
-            <View style={{ width: itemWidth, padding: 1 }}>
-              <ListingCard
-                {...item}
-                timePosted={getTimeAgo(item.created_at)}
-                user={{
-                  name: item.user_name,
-                  image: item.user_image,
-                }}
-                onPress={() => router.push(`/listing/${item.id}`)}
-              />
-            </View>
-          )}
-          contentContainerStyle={{ paddingHorizontal: 14 }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={COLORS.utOrange}
-            />
-          }
+          value={searchQuery}
+          onChangeText={handleSearch}
+          onFilterPress={() => setShowFilters(true)}
         />
-      )}
+
+        {/* Categories */}
+        <CategoryButtons
+          selectedCategory={selectedCategory}
+          onCategoryPress={handleCategoryPress}
+        />
+
+        {/* Listings */}
+        {loading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color={COLORS.utOrange} />
+          </View>
+        ) : (
+          <FlatList
+            data={listings}
+            keyExtractor={item => item.id.toString()}
+            numColumns={2}
+            renderItem={({ item }) => (
+              <View style={{ width: itemWidth, padding: 1 }}>
+                <ListingCard
+                  {...item}
+                  timePosted={getTimeAgo(item.created_at)}
+                  user={{
+                    name: item.user_name,
+                    image: item.user_image,
+                  }}
+                  onPress={() => router.push(`/listing/${item.id}`)}
+                />
+              </View>
+            )}
+            contentContainerStyle={{ paddingHorizontal: 14 }}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={COLORS.utOrange}
+              />
+            }
+          />
+        )}
 
       {/* Filter Modal */}
       <FilterModal

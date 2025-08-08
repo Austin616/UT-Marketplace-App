@@ -135,18 +135,18 @@ export default function ListingScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={[]}>
+      <View className="flex-1 bg-white">
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={COLORS.utOrange} />
           <Text className="text-gray-500 mt-4">Loading listing...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error || !listing) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={[]}>
+      <View className="flex-1 bg-white">
         <View className="flex-1 items-center justify-center p-4">
           <Text className="text-red-600 text-center mb-4">{error || 'Listing not found'}</Text>
           <TouchableOpacity
@@ -157,7 +157,7 @@ export default function ListingScreen() {
             <Text className="text-white font-medium">Go Back</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -165,7 +165,7 @@ export default function ListingScreen() {
   const shouldShowBuyerView = !isOwner || viewAsBuyer;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={[]}>      
+    <View className="flex-1 bg-white">      
       {shouldShowBuyerView ? (
         <ListingBuyerView
           listing={listing}
@@ -190,6 +190,6 @@ export default function ListingScreen() {
           onViewAsBuyer={() => setViewAsBuyer(true)}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }

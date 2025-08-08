@@ -3,7 +3,11 @@ import { Platform } from 'react-native';
 const IOS_SYSTEM_COLORS = {
   white: 'rgb(255, 255, 255)',
   black: 'rgb(0, 0, 0)',
-  utOrange: '#C1501F',
+  utOrange: '#BF5700', // UT burnt orange
+  utGrey: '#333F48',
+  utGreyDarkMode: '#9CA3AF',
+  statusOpen: '#22c55e',
+  statusClosed: '#ef4444',
   iconBg: '#fef7ed',
   iconBgOpacity: '15',
   light: {
@@ -39,7 +43,11 @@ const IOS_SYSTEM_COLORS = {
 const ANDROID_COLORS = {
   white: 'rgb(255, 255, 255)',
   black: 'rgb(0, 0, 0)',
-  utOrange: '#C1501F',
+  utOrange: '#BF5700', // UT burnt orange
+  utGrey: '#333F48',
+  utGreyDarkMode: '#9CA3AF',
+  statusOpen: '#22c55e',
+  statusClosed: '#ef4444',
   iconBg: '#fef7ed',
   iconBgOpacity: '15',
   light: {
