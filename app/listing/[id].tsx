@@ -70,18 +70,15 @@ export default function ListingScreen() {
       setLoading(true);
       setError(null);
 
-      // Fetch listing data with user information
+      // Fetch listing data from the source of truth (listings table)
       const { data: listingData, error: listingError } = await supabase
-        .from('listing_details')
+        .from('listings')
         .select('*')
         .eq('id', id)
         .single();
 
       if (listingError) throw listingError;
       if (!listingData) throw new Error('Listing not found');
-
-      setListing(listingData);
-
 
       // Fetch user settings for the listing owner
       const { data: userData } = await supabase
@@ -91,6 +88,19 @@ export default function ListingScreen() {
         .single();
 
       setUserSettings(userData);
+
+      const resolvedUserName =
+        userData?.display_name ||
+        (userData?.email ? userData.email.split('@')[0] : undefined);
+
+      const resolvedUserImage = userData?.profile_image_url || null;
+
+      setListing({
+        ...listingData,
+        status: listingData.status || 'approved',
+        user_name: resolvedUserName,
+        user_image: resolvedUserImage,
+      });
 
       // Get count of user's other listings
       const { count } = await supabase
