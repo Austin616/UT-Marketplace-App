@@ -263,186 +263,164 @@ export default function EditListingScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
-          <View className="p-6">
-            {/* Header Section */}
-            <View className="items-center mb-8">
-              <View className="w-16 h-16 bg-orange-50 rounded-full items-center justify-center mb-4">
-                <FileText size={28} color={COLORS.utOrange} />
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ padding: 20, paddingBottom: 24 }}
+        >
+          {/* Header */}
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900">Edit Listing</Text>
+            <Text className="text-sm text-gray-500 mt-1">Update photos and details</Text>
+            {listing?.status === 'denied' && (
+              <View className="mt-3 self-start px-3 py-1 rounded-full bg-red-50">
+                <Text className="text-xs font-semibold text-red-700">Needs updates</Text>
               </View>
-              <Text className="text-2xl font-bold text-gray-900 mb-2">Edit Your Listing</Text>
-              <Text className="text-gray-600 text-center text-base leading-6">
-                Update your listing details and photos
-              </Text>
+            )}
+          </View>
+
+          {/* Photos */}
+          <View className="mb-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center">
+                <View className="w-9 h-9 rounded-full items-center justify-center mr-3" style={{ backgroundColor: '#EFF6FF' }}>
+                  <Camera size={16} color="#3B82F6" />
+                </View>
+                <View>
+                  <Text className="text-base font-semibold text-gray-900">Photos</Text>
+                  <Text className="text-xs text-gray-500">Add up to 5 images</Text>
+                </View>
+              </View>
+              <Text className="text-xs text-gray-500">{images.length}/5</Text>
             </View>
-              {/* Images Section */}
-              <View className="mb-6">
-                <View className="flex-row items-center mb-3">
-                  <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                    <Camera size={16} color="#3B82F6" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Photos</Text>
-                </View>
-                <Text className="text-xs text-gray-500 mb-3">Add up to 5 photos</Text>
-                
-                <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-                  {images.map((uri, index) => (
-                    <View key={index} className="relative" style={{ width: '30%', aspectRatio: 1 }}>
-                      <View className="w-full h-full rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
-                        <Image source={{ uri }} className="w-full h-full" resizeMode="cover" />
-                        <TouchableOpacity
-                          onPress={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full items-center justify-center shadow-lg"
-                        >
-                          <X size={14} color="white" />
-                        </TouchableOpacity>
-                      </View>
-                      <View className="absolute bottom-2 left-2 bg-black/60 rounded-full w-6 h-6 items-center justify-center">
-                        <Text className="text-white text-xs font-bold">{index + 1}</Text>
-                      </View>
-                    </View>
-                  ))}
-                  {images.length < 5 && (
-                    <View style={{ width: '30%', aspectRatio: 1 }}>
-                      <TouchableOpacity
-                        onPress={pickImage}
-                        className="w-full h-full rounded-2xl items-center justify-center border-2 border-dashed"
-                        style={{ borderColor: '#C1501F', backgroundColor: '#FFF7ED' }}
-                      >
-                        <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mb-2">
-                          <Plus size={20} color={COLORS.utOrange} />
-                        </View>
-                        <Text className="text-xs font-semibold" style={{ color: '#C1501F' }}>
-                          Add Photo
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
 
-                {images.length > 0 && (
-                  <View className="mt-4 pt-4 border-t border-gray-100">
-                    <Text className="text-sm font-medium text-gray-700">
-                      Photos added: {images.length}/5
+            <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+              {images.map((uri, index) => (
+                <View key={index} className="relative" style={{ width: '30%', aspectRatio: 1 }}>
+                  <View className="w-full h-full rounded-2xl overflow-hidden bg-gray-100">
+                    <Image source={{ uri }} className="w-full h-full" resizeMode="cover" />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => removeImage(index)}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full items-center justify-center"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 10 }}
+                  >
+                    <X size={12} color="white" />
+                  </TouchableOpacity>
+                  <View className="absolute bottom-2 left-2 bg-black/60 rounded-full w-6 h-6 items-center justify-center">
+                    <Text className="text-white text-xs font-bold">{index + 1}</Text>
+                  </View>
+                </View>
+              ))}
+              {images.length < 5 && (
+                <View style={{ width: '30%', aspectRatio: 1 }}>
+                  <TouchableOpacity
+                    onPress={pickImage}
+                    className="w-full h-full rounded-2xl items-center justify-center border border-dashed"
+                    style={{ borderColor: '#C1501F', backgroundColor: '#FFF7ED' }}
+                  >
+                    <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mb-2">
+                      <Plus size={20} color={COLORS.utOrange} />
+                    </View>
+                    <Text className="text-xs font-semibold" style={{ color: '#C1501F' }}>
+                      Add Photo
                     </Text>
-                  </View>
-                )}
-              </View>
-
-              <View className="mb-5">
-                <View className="flex-row items-center mb-2">
-                  <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                    <FileText size={16} color="#3B82F6" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Title</Text>
+                  </TouchableOpacity>
                 </View>
+              )}
+            </View>
+          </View>
+
+          {/* Details */}
+          <View className="mb-4">
+            <Text className="text-base font-semibold text-gray-900 mb-4">Details</Text>
+
+            <View className="mb-4">
+              <Text className="text-xs font-semibold text-gray-600 mb-2">Title</Text>
+              <TextInput
+                className="text-base bg-gray-50 rounded-xl px-4 border border-gray-100"
+                placeholder="What are you selling?"
+                value={title}
+                onChangeText={setTitle}
+                placeholderTextColor="#9CA3AF"
+                textAlignVertical="center"
+                style={{ fontSize: 16, height: 52, paddingTop: 0, paddingBottom: 0 }}
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-xs font-semibold text-gray-600 mb-2">Category</Text>
+              <Dropdown
+                value={category}
+                options={categories}
+                onSelect={(value) => setCategory(value as typeof categories[number])}
+                placeholder="Select a category"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-xs font-semibold text-gray-600 mb-2">Price</Text>
+              <View className="flex-row items-center bg-gray-50 rounded-xl px-4 border border-gray-100" style={{ height: 52 }}>
+                <Text className="text-gray-500 mr-2 text-base font-medium">$</Text>
                 <TextInput
-                  className="text-base bg-gray-50 rounded-xl px-4 py-3 border border-transparent focus:border-blue-200"
-                  placeholder="What are you selling?"
-                  value={title}
-                  onChangeText={setTitle}
+                  className="flex-1 text-base p-0"
+                  placeholder="0.00"
+                  value={price}
+                  onChangeText={setPrice}
+                  keyboardType="decimal-pad"
                   placeholderTextColor="#9CA3AF"
-                  style={{ fontSize: 16 }}
+                  textAlignVertical="center"
+                  style={{ fontSize: 16, height: 52, paddingTop: 0, paddingBottom: 0 }}
                 />
               </View>
+            </View>
 
-              <View className="mb-5">
-                <View className="flex-row items-center mb-2">
-                  <View className="w-8 h-8 bg-purple-50 rounded-full items-center justify-center mr-3">
-                    <Tag size={16} color="#8B5CF6" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Category</Text>
-                </View>
-                <Dropdown
-                  value={category}
-                  options={categories}
-                  onSelect={(value) => setCategory(value as typeof categories[number])}
-                  placeholder="Select a category"
-                />
-              </View>
+            <View className="mb-4">
+              <Text className="text-xs font-semibold text-gray-600 mb-2">Condition</Text>
+              <Dropdown
+                value={condition}
+                options={conditions}
+                onSelect={(value) => setCondition(value as typeof conditions[number])}
+                placeholder="Select condition"
+              />
+            </View>
 
-              <View className="mb-5">
-                <View className="flex-row items-center mb-2">
-                  <View className="w-8 h-8 bg-green-50 rounded-full items-center justify-center mr-3">
-                    <DollarSign size={16} color="#10B981" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Price</Text>
-                </View>
-                <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-transparent focus-within:border-green-200">
-                  <Text className="text-gray-500 mr-2 text-base font-medium">$</Text>
-                  <TextInput
-                    className="flex-1 text-base p-0"
-                    placeholder="0.00"
-                    value={price}
-                    onChangeText={setPrice}
-                    keyboardType="decimal-pad"
-                    placeholderTextColor="#9CA3AF"
-                    style={{ fontSize: 16 }}
-                  />
-                </View>
-              </View>
+            <View className="mb-4">
+              <Text className="text-xs font-semibold text-gray-600 mb-2">Location</Text>
+              <Dropdown
+                value={location}
+                options={locations}
+                onSelect={(value) => setLocation(value as typeof locations[number])}
+                placeholder="Select a location"
+              />
+            </View>
 
-              <View className="mb-5">
-                <View className="flex-row items-center mb-2">
-                  <View className="w-8 h-8 bg-yellow-50 rounded-full items-center justify-center mr-3">
-                    <Star size={16} color="#F59E0B" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Condition</Text>
-                </View>
-                <Dropdown
-                  value={condition}
-                  options={conditions}
-                  onSelect={(value) => setCondition(value as typeof conditions[number])}
-                  placeholder="Select condition"
-                />
-              </View>
-
-              <View className="mb-5">
-                <View className="flex-row items-center mb-2">
-                  <View className="w-8 h-8 bg-red-50 rounded-full items-center justify-center mr-3">
-                    <MapPin size={16} color="#EF4444" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Location</Text>
-                </View>
-                <Dropdown
-                  value={location}
-                  options={locations}
-                  onSelect={(value) => setLocation(value as typeof locations[number])}
-                  placeholder="Select a location"
-                />
-              </View>
-
-              <View>
-                <View className="flex-row items-center mb-2">
-                  <View className="w-8 h-8 bg-indigo-50 rounded-full items-center justify-center mr-3">
-                    <FileText size={16} color="#6366F1" />
-                  </View>
-                  <Text className="text-sm font-semibold text-gray-700">Description</Text>
-                </View>
-                <TextInput
-                  className="text-base bg-gray-50 rounded-xl px-4 py-3 border border-transparent focus:border-indigo-200"
-                  placeholder="Describe your item in detail..."
-                  value={description}
-                  onChangeText={setDescription}
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                  placeholderTextColor="#9CA3AF"
-                  style={{ fontSize: 16, minHeight: 100 }}
-                />
-              </View>
+            <View>
+              <Text className="text-xs font-semibold text-gray-600 mb-2">Description</Text>
+              <TextInput
+                className="text-base bg-gray-50 rounded-xl px-4 py-3 border border-gray-100"
+                placeholder="Describe your item in detail..."
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+                placeholderTextColor="#9CA3AF"
+                style={{ fontSize: 16, minHeight: 110 }}
+              />
+            </View>
           </View>
         </ScrollView>
 
         {/* Bottom Actions */}
-        <View className="px-4 py-3 border-t mb-8 border-gray-100 flex-row gap-3">
+        <View className="px-4 pt-3 pb-4 border-t border-gray-100 flex-row gap-3 bg-white">
           <TouchableOpacity
             onPress={() => router.back()}
-            className="flex-1 flex-row items-center justify-center py-3.5 rounded-xl border-2"
+            className="flex-1 flex-row items-center justify-center py-3.5 rounded-xl border border-gray-200 bg-white"
             style={{ borderColor: COLORS.utOrange }}
           >
             <Text className="font-medium" style={{ color: COLORS.utOrange }}>
