@@ -3,9 +3,9 @@ import { useAuth } from '~/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { supabase } from '~/lib/supabase';
 import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { Plus, MapPin } from 'lucide-react-native';
 import { COLORS } from '~/theme/colors';
-import StatusBadge, { StatusDescription } from '~/components/StatusBadge';
+import { getTimeAgo } from '../../utils/timeago';
 
 interface Listing {
   id: string;
@@ -60,10 +60,19 @@ export default function MyListingsScreen() {
     setRefreshing(false);
   };
 
-  const renderItem = ({ item }: { item: Listing }) => (
-    <View className="bg-white p-4 mb-2 rounded-xl">
-      <TouchableOpacity 
-        className="flex-row"
+  const getStatusMeta = (listing: Listing) => {
+    if (listing.is_sold) return { label: 'Sold', color: '#6B7280' };
+    if (listing.status === 'pending') return { label: 'Under review', color: '#D97706' };
+    if (listing.status === 'denied') return { label: 'Needs updates', color: '#DC2626' };
+    return { label: 'Live', color: '#16A34A' };
+  };
+
+  const renderItem = ({ item }: { item: Listing }) => {
+    const statusMeta = getStatusMeta(item);
+
+    return (
+      <TouchableOpacity
+        className="flex-row items-center py-2.5 border-b border-gray-100"
         onPress={() => router.push({
           pathname: '/listing/[id]',
           params: { id: item.id }
@@ -71,37 +80,31 @@ export default function MyListingsScreen() {
       >
         <Image
           source={{ uri: item.images?.[0] || 'https://picsum.photos/200' }}
-          className="w-20 h-20 rounded-lg"
+          className="w-12 h-12 rounded-lg"
           resizeMode="cover"
         />
-        <View className="flex-1 ml-4">
-          <Text className="text-lg font-medium text-gray-900">{item.title}</Text>
-          <Text style={{ color: COLORS.utOrange, fontWeight: 'bold' }}>${item.price}</Text>
-          <Text className="text-gray-500">{item.location}</Text>
-          {item.is_sold && (
-            <View className="bg-gray-100 self-start px-2 py-1 rounded-full mt-1">
-              <Text className="text-xs text-gray-600">Sold</Text>
-            </View>
-          )}
+        <View className="flex-1 ml-3">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-base font-semibold text-gray-900 flex-1" numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={{ color: COLORS.utOrange }} className="text-sm font-semibold ml-2">
+              ${item.price}
+            </Text>
+          </View>
+          <View className="flex-row items-center mt-1">
+            <MapPin size={12} color="#9CA3AF" />
+            <Text className="text-xs text-gray-500 ml-1">{item.location}</Text>
+            <Text className="text-xs text-gray-400 ml-2">• {getTimeAgo(item.created_at)}</Text>
+          </View>
+          <View className="flex-row items-center mt-1">
+            <View className="w-2 h-2 rounded-full" style={{ backgroundColor: statusMeta.color }} />
+            <Text className="text-xs text-gray-500 ml-2">{statusMeta.label}</Text>
+          </View>
         </View>
       </TouchableOpacity>
-      
-      {/* Status Badge */}
-      <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-gray-100">
-        <StatusBadge status={item.status || 'pending'} size="small" />
-        {item.status === 'denied' && item.denial_reason && (
-          <Text className="text-xs text-gray-500 flex-1 ml-2" numberOfLines={1}>
-            {item.denial_reason}
-          </Text>
-        )}
-      </View>
-      
-      {/* Status Description for denied items */}
-      {item.status === 'denied' && (
-        <StatusDescription status={item.status} denialReason={item.denial_reason} />
-      )}
-    </View>
-  );
+    );
+  };
 
   if (!user) {
     return (
@@ -129,19 +132,28 @@ export default function MyListingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50 p-4">
+    <View className="flex-1 bg-white">
+      <View className="px-5 pt-4 pb-2">
         <Text className="text-2xl font-bold text-gray-900">My Listings</Text>
-        <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-gray-500">Total Listings: {listings.length}</Text>
-            <TouchableOpacity onPress={() => router.push('/create')} className="px-6 py-3 rounded-xl flex-row items-center" style={{ backgroundColor: COLORS.utOrange }}>
-                <Plus size={20} color="white" />
-                <Text className="text-white font-medium ml-2">Create Listing</Text>
-            </TouchableOpacity>
-        </View>
+        <Text className="text-sm text-gray-500 mt-1">Total listings: {listings.length}</Text>
+      </View>
+
+      <View className="px-5 mt-2 mb-4">
+        <TouchableOpacity
+          onPress={() => router.push('/create')}
+          className="flex-row items-center justify-center py-3.5 rounded-2xl"
+          style={{ backgroundColor: COLORS.utOrange }}
+        >
+          <Plus size={18} color="white" />
+          <Text className="text-white font-semibold ml-2">Create Listing</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={listings}
         renderItem={renderItem}
         keyExtractor={item => item.id.toString()}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

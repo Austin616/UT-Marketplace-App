@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
-import { Tabs , usePathname } from 'expo-router';
-import { Home, Search, MessageCircle, User, Plus } from 'lucide-react-native';
-import { View } from 'react-native';
+import { Tabs, usePathname, useRouter } from 'expo-router';
+import { Home, Search, MessageCircle, User, Plus, Settings } from 'lucide-react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useState, createContext, useContext } from 'react';
-import TopBar from "~/components/layout/TopBar";
+import AppHeader from '~/components/layout/AppHeader';
 import { COLORS } from '~/theme/colors';
 import { useMessageCount } from '~/contexts/MessageCountContext';
+import { useAuth } from '~/contexts/AuthContext';
 
 // Create context for home refresh
 const HomeRefreshContext = createContext<{
@@ -22,6 +23,8 @@ export const useHomeRefresh = () => useContext(HomeRefreshContext);
 
 function ConditionalHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
   
   // Don't show header for modal screens or specific routes
   if (pathname.startsWith('/(modals)') || pathname.startsWith('/chat/') || pathname.startsWith('/listing/')) {
@@ -32,27 +35,56 @@ function ConditionalHeader() {
   switch (pathname) {
     case '/browse':
       return (
-        <View className="bg-white border-b border-gray-100">
-          <TopBar variant="browse" />
-        </View>
+        <AppHeader
+          variant="large"
+          title="Browse"
+          rightElement={
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/create');
+              }}
+              className="p-2 bg-orange-50 rounded-full"
+            >
+              <Plus size={18} color={COLORS.utOrange} />
+            </TouchableOpacity>
+          }
+        />
       );
     case '/profile':
       return (
-        <View className="bg-white border-b border-gray-100">
-          <TopBar variant="profile" />
-        </View>
+        <AppHeader
+          variant="large"
+          title="Profile"
+          rightElement={
+            user ? (
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/(modals)/settings');
+                }}
+                className="p-2 bg-orange-50 rounded-full"
+              >
+                <Settings size={18} color={COLORS.utOrange} />
+              </TouchableOpacity>
+            ) : null
+          }
+        />
       );
     case '/messages':
       return (
-        <View className="bg-white border-b border-gray-100">
-          <TopBar variant="messages" />
-        </View>
+        <AppHeader
+          variant="large"
+          title="Messages"
+        />
       );
     case '/create':
       return (
-        <View className="bg-white border-b border-gray-100">
-          <TopBar variant="create" />
-        </View>
+        <AppHeader
+          variant="large"
+          title="Sell Item"
+          subtitle="Create a listing in a few steps"
+        />
       );
     case '/':
     default:

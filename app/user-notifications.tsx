@@ -10,14 +10,14 @@ import {
   Pressable,
   Image
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '~/contexts/AuthContext';
 import { UserNotificationService, UserNotification } from '~/lib/userNotifications';
-import { ArrowLeft, MessageCircle, Star, Trash2, CheckCheck, Bell, BellOff, Heart, Eye, Settings, MoreHorizontal } from 'lucide-react-native';
+import { MessageCircle, Star, Trash2, CheckCheck, Bell, BellOff, Heart, Eye, Settings, MoreHorizontal } from 'lucide-react-native';
 import { COLORS } from '~/theme/colors';
 import { getTimeAgo } from '~/utils/timeago';
 import * as Haptics from 'expo-haptics';
+import AppHeader from '~/components/layout/AppHeader';
 
 export default function UserNotificationsScreen() {
   const router = useRouter();
@@ -408,14 +408,8 @@ export default function UserNotificationsScreen() {
     return (
       <View className="flex-1 bg-gray-50">
         {/* Header */}
-        <View className="py-4 px-4 border-b border-gray-200 bg-white">
-          <View className="flex-row items-center justify-between mb-3">
-            <TouchableOpacity onPress={() => router.back()}>
-              <ArrowLeft size={24} color={COLORS.utOrange} />
-            </TouchableOpacity>
-            <Text className="text-2xl font-bold text-gray-900">Notifications</Text>
-            <View className="w-6" />
-          </View>
+        <View className="bg-white border-b border-gray-200">
+          <AppHeader variant="standard" title="Notifications" showBackButton showBorder={false} />
         </View>
 
         {/* Login Required Content */}
@@ -450,22 +444,23 @@ export default function UserNotificationsScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="py-4 px-4 border-b border-gray-200 bg-white">
-        <View className="flex-row items-center justify-between mb-3">
-          <TouchableOpacity onPress={() => selectionMode ? toggleSelectionMode() : router.back()}>
-            <ArrowLeft size={24} color={COLORS.utOrange} />
-          </TouchableOpacity>
-          <Text className="text-2xl font-bold text-gray-900">
-            {selectionMode ? `${selectedNotifications.size} selected` : 'Notifications'}
-          </Text>
-          <TouchableOpacity onPress={toggleSelectionMode}>
-            <MoreHorizontal size={24} color={COLORS.utOrange} />
-          </TouchableOpacity>
-        </View>
+      <View className="bg-white border-b border-gray-200">
+        <AppHeader
+          variant="standard"
+          title={selectionMode ? `${selectedNotifications.size} selected` : 'Notifications'}
+          showBackButton
+          showBorder={false}
+          onBackPress={() => (selectionMode ? toggleSelectionMode() : router.back())}
+          rightElement={
+            <TouchableOpacity onPress={toggleSelectionMode}>
+              <MoreHorizontal size={20} color={COLORS.utOrange} />
+            </TouchableOpacity>
+          }
+        />
         
         {selectionMode ? (
           // Selection mode controls
-          <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center justify-between px-4 pb-3">
             <TouchableOpacity
               onPress={selectAll}
               className="flex-row items-center bg-blue-50 rounded-full px-3 py-2"
@@ -499,7 +494,7 @@ export default function UserNotificationsScreen() {
           </View>
         ) : (
           // Normal mode controls
-          <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center justify-between px-4 pb-3">
             <Text className="text-gray-600">
               {notifications.length === 0 
                 ? 'No notifications'

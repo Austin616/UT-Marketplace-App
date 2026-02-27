@@ -7,8 +7,7 @@ export default function CreateLayout() {
       screenOptions={{
         headerShown: true,
         header: ({ options }) => (
-          <ModalHeader
-          />
+          <ModalHeader title={options.title} />
         ),
         animation: 'slide_from_right',
       }}>

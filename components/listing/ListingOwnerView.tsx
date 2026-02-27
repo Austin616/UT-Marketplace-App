@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { COLORS } from '~/theme/colors';
 import { MapPin, Calendar, Tag, Edit3, Trash2, Eye, CheckCircle, MessageCircle, Heart, FileText, Settings, Clock, XCircle } from 'lucide-react-native';
 import { AnimatedButton } from '~/components/ui/AnimatedButton';
-import { ListingActionsModal } from '~/components/modals/ListingActionsModal';
 import { ImageViewerModal } from '~/components/modals/ImageViewerModal';
 import { supabase } from '~/lib/supabase';
 import { useState, useEffect } from 'react';
@@ -53,7 +52,6 @@ export const ListingOwnerView: React.FC<ListingOwnerViewProps> = ({
 }) => {
   const router = useRouter();
   const [updating, setUpdating] = useState(false);
-  const [showActionsModal, setShowActionsModal] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [favoriteCounts, setFavoriteCounts] = useState({
     favorites: 0,
@@ -318,85 +316,115 @@ export const ListingOwnerView: React.FC<ListingOwnerViewProps> = ({
           )}
 
 
-          {/* Public Engagement Stats */}
-          <View className="bg-gray-50 rounded-xl p-5 mb-6">
-            <Text className="text-lg font-semibold text-gray-800 mb-4">Community Interest</Text>
-            <View className="flex-row justify-around">
-              <View className="items-center">
-                <View className="bg-red-100 rounded-full p-3 mb-2">
-                  <Heart size={20} color="#ef4444" />
-                </View>
-                <Text className="text-sm text-gray-600 mb-1">People who liked this</Text>
-                <Text className="font-bold text-gray-900 text-lg">{favoriteCounts.favorites}</Text>
-              </View>
-              <View className="items-center">
-                <View className="bg-blue-100 rounded-full p-3 mb-2">
-                  <Eye size={20} color="#3b82f6" />
-                </View>
-                <Text className="text-sm text-gray-600 mb-1">People watching</Text>
-                <Text className="font-bold text-gray-900 text-lg">{favoriteCounts.watchlist}</Text>
-              </View>
+          {/* Engagement */}
+          <View className="flex-row items-center justify-between mb-6">
+            <View className="flex-row items-center">
+              <Heart size={14} color="#9CA3AF" />
+              <Text className="text-sm text-gray-500 ml-2">{favoriteCounts.favorites} likes</Text>
+            </View>
+            <View className="flex-row items-center">
+              <Eye size={14} color="#9CA3AF" />
+              <Text className="text-sm text-gray-500 ml-2">{favoriteCounts.watchlist} watching</Text>
             </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* Fixed Bottom Button */}
-      <View className="p-4 border-t border-gray-200 bg-white">
+      {/* Actions */}
+      <View className="p-4 border-t border-gray-200 bg-white space-y-3">
         {listing.status === 'pending' ? (
-          <View 
-            style={{
-              backgroundColor: '#F3F4F6',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingVertical: 18,
-              borderRadius: 16,
-              borderWidth: 1,
-              borderColor: '#D1D5DB',
-            }}
-          >
-            <Clock size={22} color="#6B7280" />
-            <Text className="text-gray-500 font-bold text-lg ml-2">Listing is Pending - Please Wait</Text>
+          <View className="flex-row items-center justify-center py-3 rounded-xl bg-gray-100">
+            <Clock size={16} color="#6B7280" />
+            <Text className="text-gray-600 font-semibold ml-2">Listing under review</Text>
           </View>
         ) : (
-          <AnimatedButton
-            onPress={() => setShowActionsModal(true)}
-            hapticType="medium"
-            scaleValue={0.97}
-            style={{
-              backgroundColor: COLORS.utOrange,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingVertical: 18,
-              borderRadius: 16,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-            }}
-          >
-            <Settings size={22} color="white" />
-            <Text className="text-white font-bold text-lg ml-2">Manage Listing</Text>
-          </AnimatedButton>
+          <>
+            <AnimatedButton
+              onPress={handleEditListing}
+              hapticType="light"
+              scaleValue={0.97}
+              style={{
+                backgroundColor: COLORS.utOrange,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 14,
+                borderRadius: 12,
+              }}
+            >
+              <Edit3 size={18} color="white" />
+              <Text className="text-white font-semibold ml-2">Edit</Text>
+            </AnimatedButton>
+
+            <View className="h-1" />
+            <AnimatedButton
+              onPress={handleMarkAsSold}
+              hapticType="light"
+              scaleValue={0.97}
+              disabled={updating}
+              style={{
+                borderWidth: 1,
+                borderColor: listing.is_sold ? '#10b981' : '#ef4444',
+                backgroundColor: 'white',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 14,
+                borderRadius: 12,
+                opacity: updating ? 0.7 : 1,
+              }}
+            >
+              <CheckCircle size={18} color={listing.is_sold ? '#10b981' : '#ef4444'} />
+              <Text
+                className="font-semibold ml-2"
+                style={{ color: listing.is_sold ? '#10b981' : '#ef4444' }}
+              >
+                {listing.is_sold ? 'Mark Available' : 'Mark Sold'}
+              </Text>
+            </AnimatedButton>
+
+            <View className="h-1" />
+            <AnimatedButton
+              onPress={handleViewAsPublic}
+              hapticType="light"
+              scaleValue={0.97}
+              style={{
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                backgroundColor: 'white',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 14,
+                borderRadius: 12,
+              }}
+            >
+              <Eye size={18} color="#6B7280" />
+              <Text className="text-gray-700 font-semibold ml-2">View as buyer</Text>
+            </AnimatedButton>
+
+            <View className="h-1" />
+            <AnimatedButton
+              onPress={handleDeleteListing}
+              hapticType="light"
+              scaleValue={0.95}
+              disabled={updating}
+              style={{
+                backgroundColor: '#FEF2F2',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 14,
+                borderRadius: 12,
+                opacity: updating ? 0.7 : 1,
+              }}
+            >
+              <Trash2 size={18} color="#DC2626" />
+              <Text className="text-red-600 font-semibold ml-2">Delete</Text>
+            </AnimatedButton>
+          </>
         )}
       </View>
-
-      {/* Actions Modal - Only show if not pending */}
-      {listing.status !== 'pending' && (
-        <ListingActionsModal
-          visible={showActionsModal}
-          onClose={() => setShowActionsModal(false)}
-          listing={listing}
-          onEdit={handleEditListing}
-          onMarkAsSold={handleMarkAsSold}
-          onDelete={handleDeleteListing}
-          onViewAsPublic={handleViewAsPublic}
-          updating={updating}
-        />
-      )}
 
       {/* Image Viewer Modal */}
       <ImageViewerModal

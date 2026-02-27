@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Calendar, Star, MessageCircle } from 'lucide-react-native';
+import { Calendar, Star, MessageCircle } from 'lucide-react-native';
 import { COLORS } from '~/theme/colors';
 import { supabase } from '~/lib/supabase';
 import { useAuth } from '~/contexts/AuthContext';
 import { getTimeAgo } from '~/utils/timeago';
 import UserRatingDisplay from '~/components/ui/UserRatingDisplay';
+import AppHeader from '~/components/layout/AppHeader';
 
 interface Rating {
   id: string;
@@ -92,16 +93,7 @@ export default function ReviewsScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white border-b border-gray-200 px-4 py-4">
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => router.back()}>
-            <ChevronLeft size={24} color={COLORS.utOrange} />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Reviews</Text>
-          <View className="w-6" />
-        </View>
-      </View>
+      <AppHeader variant="standard" title="Reviews" showBackButton />
 
       <ScrollView
         refreshControl={

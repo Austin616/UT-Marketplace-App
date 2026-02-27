@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, ActivityIndicator, Alert, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { COLORS } from '~/theme/colors';
-import { MessageCircle, User, Clock, ChevronRight, Bell, BellOff, Heart, Eye, Mail, ChevronLeft, X, Trash2, Check, CheckCheck, Settings } from 'lucide-react-native';
-import ModalHeader from '~/components/layout/ModalHeader';
+import { MessageCircle, User, Clock, ChevronRight, Bell, BellOff, Heart, Eye, Mail, X, Trash2, Check, CheckCheck, Settings } from 'lucide-react-native';
+import AppHeader from '~/components/layout/AppHeader';
 import { getTimeAgo } from '~/utils/timeago';
-import { supabase } from '~/lib/supabase';
 import { useAuth } from '~/contexts/AuthContext';
 import { useNotifications } from '~/lib/useNotifications';
 import { useNotificationSync } from '~/contexts/NotificationSyncContext';
@@ -285,14 +283,8 @@ export default function NotificationsScreen() {
     return (
       <View className="flex-1 bg-gray-50">
         {/* Header */}
-        <View className="py-4 px-4 border-b border-gray-200 bg-white">
-          <View className="flex-row items-center justify-between mb-3">
-            <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft size={24} color={COLORS.utOrange} />
-            </TouchableOpacity>
-            <Text className="text-2xl font-bold text-gray-900">Notifications</Text>
-            <View className="w-6" />
-          </View>
+        <View className="bg-white border-b border-gray-200">
+          <AppHeader variant="standard" title="Notifications" showBackButton showBorder={false} />
         </View>
 
         {/* Login Required Content */}
@@ -336,54 +328,57 @@ export default function NotificationsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header Stats */}
-        <View className="py-4 px-4 border-b border-gray-200 bg-white">
-          <View className="flex-row items-center justify-between mb-3">
-            <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft size={24} color={COLORS.utOrange} />
-            </TouchableOpacity>
-            <Text className="text-2xl font-bold text-gray-900">Notifications</Text>
-            {__DEV__ && (
-              <TouchableOpacity onPress={() => setShowDebugPanel(!showDebugPanel)}>
-                <Settings size={24} color={COLORS.utOrange} />
-              </TouchableOpacity>
-            )}
-            {!__DEV__ && <View className="w-6" />}
-          </View>
+        <View className="bg-white border-b border-gray-200">
+          <AppHeader
+            variant="standard"
+            title="Notifications"
+            showBackButton
+            showBorder={false}
+            rightElement={
+              __DEV__ ? (
+                <TouchableOpacity onPress={() => setShowDebugPanel(!showDebugPanel)}>
+                  <Settings size={20} color={COLORS.utOrange} />
+                </TouchableOpacity>
+              ) : null
+            }
+          />
           
-          <View className="flex-row items-center justify-between">
-            <Text className="text-gray-600">
-              {notifications.length === 0 
-                ? 'No notifications'
-                : unreadCount > 0 
-                  ? `${unreadCount} unread of ${notifications.length} total`
-                  : `All ${notifications.length} read`
-              }
-            </Text>
-            
-            <View className="flex-row items-center gap-2">
-              {unreadCount > 0 && (
-                <TouchableOpacity
-                  onPress={handleMarkAllAsRead}
-                  className="flex-row items-center bg-blue-50 rounded-full px-3 py-2"
-                >
-                  <CheckCheck size={14} color="#1e40af" />
-                  <Text className="text-blue-800 font-medium text-xs ml-1">
-                    Read all
-                  </Text>
-                </TouchableOpacity>
-              )}
+          <View className="px-4 pb-3">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-gray-600">
+                {notifications.length === 0 
+                  ? 'No notifications'
+                  : unreadCount > 0 
+                    ? `${unreadCount} unread of ${notifications.length} total`
+                    : `All ${notifications.length} read`
+                }
+              </Text>
               
-              {notifications.length > 0 && (
-                <TouchableOpacity
-                  onPress={handleClearAll}
-                  className="flex-row items-center bg-red-50 rounded-full px-3 py-2"
-                >
-                  <Trash2 size={14} color="#dc2626" />
-                  <Text className="text-red-800 font-medium text-xs ml-1">
-                    Clear all
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <View className="flex-row items-center gap-2">
+                {unreadCount > 0 && (
+                  <TouchableOpacity
+                    onPress={handleMarkAllAsRead}
+                    className="flex-row items-center bg-blue-50 rounded-full px-3 py-2"
+                  >
+                    <CheckCheck size={14} color="#1e40af" />
+                    <Text className="text-blue-800 font-medium text-xs ml-1">
+                      Read all
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                
+                {notifications.length > 0 && (
+                  <TouchableOpacity
+                    onPress={handleClearAll}
+                    className="flex-row items-center bg-red-50 rounded-full px-3 py-2"
+                  >
+                    <Trash2 size={14} color="#dc2626" />
+                    <Text className="text-red-800 font-medium text-xs ml-1">
+                      Clear all
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
         </View>

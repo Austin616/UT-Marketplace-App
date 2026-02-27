@@ -141,13 +141,8 @@ export default function CreateScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
-        {/* Helper Text */}
-        <View className="px-5 pt-3 pb-1">
-          <Text className="text-sm text-gray-500">Create a listing in a few steps</Text>
-        </View>
-
         {/* Primary Action */}
-        <View className="px-5 mt-3">
+        <View className="px-5 pt-4">
           {user ? (
             <TouchableOpacity
               onPress={handleCreatePress}

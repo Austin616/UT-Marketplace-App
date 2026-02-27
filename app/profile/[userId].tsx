@@ -25,7 +25,7 @@ import {
   FileText,
 } from 'lucide-react-native';
 import { getTimeAgo } from '../../utils/timeago';
-import ModalHeader from '~/components/layout/ModalHeader';
+import AppHeader from '~/components/layout/AppHeader';
 import { RatingSubmissionModal } from '~/components/modals/RatingSubmissionModal';
 import UserRatingDisplay from '~/components/ui/UserRatingDisplay';
 
@@ -216,6 +216,8 @@ export default function UserProfileScreen() {
   const avgRating = ratings.length
     ? (ratings.reduce((sum, r) => sum + Number(r.rating), 0) / ratings.length).toFixed(1)
     : 'N/A';
+  const headerTitle =
+    profile.display_name || (profile.email ? profile.email.split('@')[0] : 'Profile');
 
   const renderListingItem = ({ item }: { item: Listing }) => (
     <TouchableOpacity
@@ -254,38 +256,47 @@ export default function UserProfileScreen() {
   );
 
   const renderRatingItem = ({ item }: { item: Rating }) => (
-    <View className="mb-4 rounded-2xl bg-gray-50 p-5">
-      <View className="mb-3 flex-row items-center justify-between">
+    <View className="py-3 border-b border-gray-100">
+      <View className="flex-row items-center justify-between">
         <TouchableOpacity
-          className="flex-row items-center"
+          className="flex-row items-center flex-1"
           onPress={() =>
             router.push({
               pathname: '/profile/[userId]',
               params: { userId: item.rater_id },
             })
           }
-          activeOpacity={0.8}>
+          activeOpacity={0.8}
+        >
           <View
-            className="mr-3 h-12 w-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: COLORS.utOrange }}>
-            <Text className="text-lg font-bold text-white">
+            className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+            style={{ backgroundColor: COLORS.utOrange }}
+          >
+            <Text className="text-sm font-bold text-white">
               {item.rater_name.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <View>
-            <Text className="text-lg font-semibold text-gray-900">{item.rater_name}</Text>
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+              {item.rater_name}
+            </Text>
             <View className="mt-1 flex-row items-center">
-              <Calendar size={12} color="#6b7280" />
+              <Calendar size={12} color="#9CA3AF" />
               <Text className="ml-1 text-xs text-gray-500">{getTimeAgo(item.created_at)}</Text>
             </View>
           </View>
         </TouchableOpacity>
-        <View className="rounded-full border border-gray-200 bg-white px-3 py-1">
-          <UserRatingDisplay userId={item.rater_id} rating={item.rating} />
+        <View className="flex-row items-center">
+          <View className="flex-row items-center rounded-full bg-yellow-50 px-2 py-1">
+            <Star size={12} color="#F59E0B" fill="#F59E0B" />
+            <Text className="text-xs font-semibold text-yellow-700 ml-1">
+              {item.rating.toFixed(1)}
+            </Text>
+          </View>
         </View>
       </View>
       {item.comment && (
-        <Text className="text-base leading-relaxed text-gray-700">{item.comment}</Text>
+        <Text className="mt-2 text-sm leading-relaxed text-gray-700">{item.comment}</Text>
       )}
     </View>
   );
@@ -293,7 +304,7 @@ export default function UserProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       {/* Header */}
-      <ModalHeader title="" />
+      <AppHeader variant="standard" title={headerTitle} showBackButton />
 
       <ScrollView
         className="flex-1"
